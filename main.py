@@ -38,7 +38,6 @@ def get_dataset_num_classes(dataset):
         return 62
     raise NotImplementedError
 
-
 def model_init(args):
     if args.model == 'deeplabv3_mobilenetv2':
         return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
