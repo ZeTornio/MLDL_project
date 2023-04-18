@@ -167,10 +167,10 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
     set_seed(args.seed)
-
     print(f'Initializing model...')
     model = model_init(args)
-    model.cuda()
+    if torch.cuda.is_available():
+        model.cuda()
     print('Done.')
 
     print('Generate datasets...')
