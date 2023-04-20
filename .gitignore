@@ -1,3 +1,8 @@
 #IDDA dataset
 /data/idda/images
 /data/idda/labels
+
+#Caches
+__pycache__/
+*.py[cod]
+

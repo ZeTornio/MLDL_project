@@ -8,7 +8,7 @@ from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
 import matplotlib.pyplot as plt
 
-def showIDDA(sample):
+def showIDDAsample(sample):
     #fig,(ax1,ax2)=plt.subplots(2)
     #ax1=plt.imshow(sample[0].permute(1, 2, 0)) #tensors in pytorch are channel first, need reshape
     #ax2=plt.imshow(sample[1])
@@ -28,11 +28,17 @@ class IDDADataset(VisionDataset):
 
     def __init__(self,
                  root: str,
-                 list_samples: [str],
+                 list_samples: list[str]=[],
+                 fileName:str=None,
                  transform: tr.Compose = None,
                  client_name: str = None):
         super().__init__(root=root, transform=transform, target_transform=None)
-        self.list_samples = list_samples
+
+        samples_from_file=[]
+        if fileName!=None:
+            f = open(fileName, "r") 
+            samples_from_file=[x for x in f.read().split('\n') if x != '']
+        self.list_samples = list_samples+samples_from_file
         self.client_name = client_name
         self.target_transform = self.get_mapping()
 
@@ -57,3 +63,4 @@ class IDDADataset(VisionDataset):
 
     def __len__(self) -> int:
         return len(self.list_samples)
+    
