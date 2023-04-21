@@ -7,17 +7,35 @@ from torchvision import transforms
 from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
 import matplotlib.pyplot as plt
-
+from matplotlib import colors
+from torchvision.io import read_image
+# To be verified. Referred to after-mapping with class_eval
+#0: Road, RoadLine    #5A5A5A
+#1: Sidewalk   #D3D3D3
+#2: Building  #D2B48C
+#3: Wall   #AA4A44
+#4: Fence   #964b00
+#5: Pole    #C0C0C0
+#6: Traffic light     #FFD580
+#7: Traffic sign       #FFFF00
+#8: Vegetation      #90EE90
+#9: Terrain #885F47
+#10: Sky   #ADD8E6
+#11: Pedestrian     #D30000
+#12: Rider      #FA8072
+#13: Vehicle    #004999
+#14: Motorcycle #0055B3
+#15: Bicycle    #0062CC
+#255: Unlabeled,Other k
+#cmap at the moment not used
+cmap = colors.ListedColormap(['#5A5A5A','#D3D3D3','#D2B48C','#AA4A44','#964b00','#C0C0C0','#FFD580','#FFFF00','#90EE90','#885F47','#ADD8E6','#D30000','#FA8072','#004999','#0055B3','#0062CC','k'])
 def showIDDAsample(sample):
-    #fig,(ax1,ax2)=plt.subplots(2)
-    #ax1=plt.imshow(sample[0].permute(1, 2, 0)) #tensors in pytorch are channel first, need reshape
-    #ax2=plt.imshow(sample[1])
     fig=plt.figure()
     fig.add_subplot(2,1,1)
-    plt.imshow(sample[0].permute(1, 2, 0))
+    plt.imshow(sample[0].permute(1,2,0))
     plt.axis('off')
     fig.add_subplot(2,1,2)
-    plt.imshow(sample[1])
+    plt.imshow(sample[1],vmax=16)
     plt.axis('off')
 
 
@@ -51,14 +69,14 @@ class IDDADataset(VisionDataset):
         return lambda x: from_numpy(mapping[x])
 
     def __getitem__(self, index: int) -> Any:
-        # TODO: missing code here!
         image=Image.open(self.root+'/images/'+self.list_samples[index]+'.jpg')
-        image=convert_tensor(image)
-        #to have pixels first instead of channel first:
-        # image=from_numpy(np.asarray(image).copy())
         target=Image.open(self.root+'/labels/'+self.list_samples[index]+'.png')
-        #TODO: capire perché,se e come usare il target_transform
-        #target=self.target_transform(np.asarray(target))
+        
+        
+        if self.transform:
+            image,target=self.transform(image,target)
+        if self.target_transform:
+            target=self.target_transform(target)
         return image, target
 
     def __len__(self) -> int:
