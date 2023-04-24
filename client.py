@@ -10,16 +10,16 @@ from utils.utils import HardNegativeMining, MeanReduction
 
 class Client:
 
-    def __init__(self, args, dataset, model, test_client=False):
-        self.args = args
+    def __init__(self, dataset, model,num_epochs, batch_size, test_client=False,hnm=False):
+        self.num_epochs = num_epochs
         self.dataset = dataset
         self.name = self.dataset.client_name
         self.model = model
-        self.train_loader = DataLoader(self.dataset, batch_size=self.args.bs, shuffle=True, drop_last=True) \
+        self.train_loader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True, drop_last=True) \
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
         self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
-        self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
+        self.reduction = HardNegativeMining() if hnm else MeanReduction()
 
     def __str__(self):
         return self.name
@@ -32,11 +32,12 @@ class Client:
         metric.update(labels, prediction)
 
     def _get_outputs(self, images):
+        raise NotImplementedError
         if self.args.model == 'deeplabv3_mobilenetv2':
             return self.model(images)['out']
         if self.args.model == 'resnet18':
             return self.model(images)
-        raise NotImplementedError
+        
 
     def run_epoch(self, cur_epoch, optimizer):
         """
@@ -55,7 +56,7 @@ class Client:
         :return: length of the local dataset, copy of the model parameters
         """
         # TODO: missing code here!
-        for epoch in range(self.args.num_epochs):
+        for epoch in range(self.num_epochs):
             # TODO: missing code here!
             raise NotImplementedError
 

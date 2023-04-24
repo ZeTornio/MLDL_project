@@ -7,8 +7,9 @@ import torch
 
 class Server:
 
-    def __init__(self, args, train_clients, test_clients, model, metrics):
-        self.args = args
+    def __init__(self, train_clients, test_clients, model, metrics,clients_per_round,num_rounds):
+        self.clients_per_round=clients_per_round
+        self.num_rounds=num_rounds
         self.train_clients = train_clients
         self.test_clients = test_clients
         self.model = model
@@ -17,7 +18,7 @@ class Server:
         self.updates = []
 
     def select_clients(self):
-        num_clients = min(self.args.clients_per_round, len(self.train_clients))
+        num_clients = min(self.clients_per_round, len(self.train_clients))
         return np.random.choice(self.train_clients, num_clients, replace=False)
     
     def add_updates(self, num_samples, updates):
@@ -91,10 +92,10 @@ class Server:
         This method orchestrates the training the evals and tests at rounds level
         """
         
-        for r in range(self.args.num_rounds):
+        for r in range(self.num_rounds):
             # TODO: missing code here!
 
-            print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
+            print(f"ROUND {r + 1}/{self.num_rounds}: Training {self.clients_per_round} Clients...")
 
             subset_clients = self.select_clients()
 
