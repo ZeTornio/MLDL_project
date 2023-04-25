@@ -10,12 +10,12 @@ from utils.utils import HardNegativeMining, MeanReduction
 
 class Client:
 
-    def __init__(self, dataset, model,num_epochs, batch_size, test_client=False,hnm=False):
-        self.num_epochs = num_epochs
+    def __init__(self, args,dataset, model, test_client=False,hnm=False):
+        self.args=args
         self.dataset = dataset
         self.name = self.dataset.client_name
         self.model = model
-        self.train_loader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True, drop_last=True) \
+        self.train_loader = DataLoader(self.dataset, batch_size=args.bs, shuffle=True, drop_last=True) \
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
         self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
@@ -45,9 +45,16 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
+        print(f'\t\tEpoch:{cur_epoch}')
         for cur_step, (images, labels) in enumerate(self.train_loader):
-            # TODO: missing code here!
-            raise NotImplementedError
+            images = images.to('gpu' if torch.cuda.is_available() else 'cpu', dtype=torch.float32)
+            labels = labels.to('gpu' if torch.cuda.is_available() else 'cpu', dtype=torch.long)
+            optimizer.zero_grad()
+            outputs=self.model(images)['out']
+            loss=self.reduction(self.criterion(outputs,labels),labels)
+            loss.backward()
+            optimizer.step()
+            #TODO: check
 
     def train(self):
         """
@@ -55,10 +62,12 @@ class Client:
         (by calling the run_epoch method for each local epoch of training)
         :return: length of the local dataset, copy of the model parameters
         """
-        # TODO: missing code here!
-        for epoch in range(self.num_epochs):
-            # TODO: missing code here!
-            raise NotImplementedError
+        optimizer=optim.SGD(self.model.parameters(),lr=self.args.lr,momentum=self.args.m,weight_decay=self.args.wd)
+        # TODO: check
+        for epoch in range(self.args.num_epochs):
+            # TODO: check
+            self.run_epoch(epoch,optimizer)
+        return self.dataset.len(),copy.deepcopy(self.model.parameters())
 
     def test(self, metric):
         """

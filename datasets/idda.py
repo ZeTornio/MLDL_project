@@ -54,7 +54,7 @@ class IDDADataset(VisionDataset):
 
         samples_from_file=[]
         if fileName!=None:
-            f = open(fileName, "r") 
+            f = open(self.root+'/'+fileName, "r") 
             samples_from_file=[x for x in f.read().split('\n') if x != '']
         self.list_samples = list_samples+samples_from_file
         self.client_name = client_name
