@@ -107,5 +107,8 @@ class Server:
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics[client.name])
             print(f"Client {client.name}: loss={loss}  samples={samples}")
+
+        self.metrics['test_same_domain'].get_results()
+        self.metrics['test_different_domain'].get_results()
         print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
         print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
