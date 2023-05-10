@@ -45,7 +45,7 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
-        print(f'\t\tEpoch:{cur_epoch}')
+        print(f'\t\tEpoch:{cur_epoch+1}')
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.float32)
             labels = labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.long)
