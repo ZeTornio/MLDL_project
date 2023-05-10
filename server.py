@@ -99,6 +99,8 @@ class Server:
             #print(self.train_clients[0].test(self.metrics['eval_train']))
             
             print('Test samedom loss')
+            
+            self.test_clients[1].model.load_state_dict(self.model_params_dict)
             self.test_clients[1].test(self.metrics['test_same_dom'])
             print(self.metrics['test_same_dom'].get_results())
 
