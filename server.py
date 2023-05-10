@@ -79,6 +79,18 @@ class Server:
             subset_clients = self.select_clients()
             updates = self.train_round(subset_clients)
             self.update_model(updates)
+
+            #Must be removed in the final version!!
+            print('Train loss')
+            print(self.train_clients[0].test(self.metrics['eval_train']))
+            
+            print('Test samedom loss')
+            print(self.test_clients[1].test(self.metrics['test_same_dom']))
+            
+            print('Test diffdom loss')
+            print(self.test_clients[0].test(self.metrics['test_diff_dom']))
+
+
             
     
 
