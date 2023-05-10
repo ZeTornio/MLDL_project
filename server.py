@@ -76,14 +76,17 @@ class Server:
         """
         
         #Must be removed in the final version!!
-        print('Train loss')
-        print(self.train_clients[0].test(self.metrics['eval_train']))
+        #print('Train loss')
+        #print(self.train_clients[0].test(self.metrics['eval_train']))
             
         print('Test samedom loss')
-        print(self.test_clients[1].test(self.metrics['test_same_dom']))
+        self.test_clients[1].test(self.metrics['test_same_dom'])
+        print(self.metrics['test_same_dom'])
+
             
         print('Test diffdom loss')
-        print(self.test_clients[0].test(self.metrics['test_diff_dom']))
+        self.test_clients[0].test(self.metrics['test_diff_dom'])
+        print(self.metrics['test_diff_dom'])
         
         for r in range(self.args.num_rounds):
             print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
@@ -92,8 +95,8 @@ class Server:
             self.update_model(updates)
 
             #Must be removed in the final version!!
-            print('Train loss')
-            print(self.train_clients[0].test(self.metrics['eval_train']))
+            #print('Train loss')
+            #print(self.train_clients[0].test(self.metrics['eval_train']))
             
             print('Test samedom loss')
             print(self.test_clients[1].test(self.metrics['test_same_dom']))

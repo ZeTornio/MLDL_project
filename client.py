@@ -75,6 +75,8 @@ class Client:
         This method tests the model on the local dataset of the client.
         :param metric: StreamMetric object
         """
+        cumulative_loss=0.
+        samples=0
         self.model.eval()
         # TODO: check
         with torch.no_grad():
@@ -83,4 +85,9 @@ class Client:
                 images = images.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.float32)
                 labels = labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.long)
                 outputs=self.model(images)['out']
+                loss=self.reduction(self.criterion(outputs,labels),labels)
+                samples+=images.shape[0]
+                cumulative_loss += loss.item()
                 self.update_metric(metric, outputs, labels)
+        print(cumulative_loss)
+        print(samples)
