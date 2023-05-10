@@ -90,7 +90,7 @@ class Server:
         """
         self.metrics['eval_train'].reset()
 
-        for client in self.test_clients:
+        for client in self.train_clients:
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics['eval_train'])
             print(f"Client {client.name}: loss={loss}  samples={samples}")
