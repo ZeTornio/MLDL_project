@@ -74,6 +74,17 @@ class Server:
         """
         This method orchestrates the training the evals and tests at rounds level
         """
+        
+        #Must be removed in the final version!!
+        print('Train loss')
+        print(self.train_clients[0].test(self.metrics['eval_train']))
+            
+        print('Test samedom loss')
+        print(self.test_clients[1].test(self.metrics['test_same_dom']))
+            
+        print('Test diffdom loss')
+        print(self.test_clients[0].test(self.metrics['test_diff_dom']))
+        
         for r in range(self.args.num_rounds):
             print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
             subset_clients = self.select_clients()
