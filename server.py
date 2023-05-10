@@ -74,6 +74,9 @@ class Server:
         """
         This method orchestrates the training the evals and tests at rounds level
         """
+        self.test()
+        self.eval_train()
+
         for r in range(self.args.num_rounds):
             print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
             subset_clients = self.select_clients()
