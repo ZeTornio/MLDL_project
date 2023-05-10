@@ -94,6 +94,8 @@ class Server:
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics['eval_train'])
             print(f"Client {client.name}: loss={loss}  samples={samples}")
+        
+        self.metrics['eval_train'].get_results()
         print(f"Complexive results:{self.metrics['eval_train']}")
 
     def test(self):
