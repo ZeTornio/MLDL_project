@@ -47,8 +47,8 @@ class Client:
         """
         print(f'\t\tEpoch:{cur_epoch}')
         for cur_step, (images, labels) in enumerate(self.train_loader):
-            images = images.to('gpu' if torch.cuda.is_available() else 'cpu', dtype=torch.float32)
-            labels = labels.to('gpu' if torch.cuda.is_available() else 'cpu', dtype=torch.long)
+            images = images.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.float32)
+            labels = labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.long)
             optimizer.zero_grad()
             outputs=self.model(images)['out']
             loss=self.reduction(self.criterion(outputs,labels),labels)
@@ -62,6 +62,7 @@ class Client:
         (by calling the run_epoch method for each local epoch of training)
         :return: length of the local dataset, copy of the model parameters
         """
+        self.model.train()
         optimizer=optim.SGD(self.model.parameters(),lr=self.args.lr,momentum=self.args.m,weight_decay=self.args.wd)
         # TODO: check
         for epoch in range(self.args.num_epochs):
@@ -74,9 +75,11 @@ class Client:
         This method tests the model on the local dataset of the client.
         :param metric: StreamMetric object
         """
-        # TODO: missing code here!
+        # TODO: check
         with torch.no_grad():
             for i, (images, labels) in enumerate(self.test_loader):
-                # TODO: missing code here!
-                raise NotImplementedError
+                # TODO: check
+                images = images.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.float32)
+                labels = labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.long)
+                outputs=self.model(images)['out']
                 self.update_metric(metric, outputs, labels)
