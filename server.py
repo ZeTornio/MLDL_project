@@ -99,10 +99,13 @@ class Server:
             #print(self.train_clients[0].test(self.metrics['eval_train']))
             
             print('Test samedom loss')
-            print(self.test_clients[1].test(self.metrics['test_same_dom']))
-            
+            self.test_clients[1].test(self.metrics['test_same_dom'])
+            print(self.metrics['test_same_dom'].get_results())
+
+                
             print('Test diffdom loss')
-            print(self.test_clients[0].test(self.metrics['test_diff_dom']))
+            self.test_clients[0].test(self.metrics['test_diff_dom'])
+            print(self.metrics['test_diff_dom'].get_results())
 
 
             
