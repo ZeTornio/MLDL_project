@@ -81,12 +81,12 @@ class Server:
             
         print('Test samedom loss')
         self.test_clients[1].test(self.metrics['test_same_dom'])
-        print(self.metrics['test_same_dom'])
+        print(self.metrics['test_same_dom'].get_results())
 
             
         print('Test diffdom loss')
         self.test_clients[0].test(self.metrics['test_diff_dom'])
-        print(self.metrics['test_diff_dom'])
+        print(self.metrics['test_diff_dom'].get_results())
         
         for r in range(self.args.num_rounds):
             print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
