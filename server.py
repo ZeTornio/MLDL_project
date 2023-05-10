@@ -31,7 +31,7 @@ class Server:
             print(f"\tCLIENT {i + 1}/{len(clients)}: {c}")
             c.model.load_state_dict(self.model_params_dict)
             num_samples, update = c.train()
-            updates[i] = (num_samples, update)
+            updates.append((num_samples, update))
         return updates
 
     def aggregate(self, updates):
