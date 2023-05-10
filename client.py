@@ -62,7 +62,6 @@ class Client:
         (by calling the run_epoch method for each local epoch of training)
         :return: length of the local dataset, copy of the model parameters
         """
-        self.model.train()
         optimizer=optim.SGD(self.model.parameters(),lr=self.args.lr,momentum=self.args.m,weight_decay=self.args.wd)
         # TODO: check
         for epoch in range(self.args.num_epochs):
@@ -75,7 +74,6 @@ class Client:
         This method tests the model on the local dataset of the client.
         :param metric: StreamMetric object
         """
-        self.model.test()
         # TODO: check
         with torch.no_grad():
             for i, (images, labels) in enumerate(self.test_loader):
