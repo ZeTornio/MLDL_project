@@ -74,40 +74,11 @@ class Server:
         """
         This method orchestrates the training the evals and tests at rounds level
         """
-        
-        #Must be removed in the final version!!
-        #print('Train loss')
-        #print(self.train_clients[0].test(self.metrics['eval_train']))
-            
-        print('Test samedom loss')
-        self.test_clients[1].test(self.metrics['test_same_dom'])
-        print(self.metrics['test_same_dom'].get_results())
-
-            
-        #print('Test diffdom loss')
-        #self.test_clients[0].test(self.metrics['test_diff_dom'])
-        #print(self.metrics['test_diff_dom'].get_results())
-        
         for r in range(self.args.num_rounds):
             print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
             subset_clients = self.select_clients()
             updates = self.train_round(subset_clients)
             self.update_model(updates)
-
-            #Must be removed in the final version!!
-            #print('Train loss')
-            #print(self.train_clients[0].test(self.metrics['eval_train']))
-            
-            print('Test samedom loss')
-            
-            self.test_clients[1].model.load_state_dict(self.model_params_dict)
-            self.test_clients[1].test(self.metrics['test_same_dom'])
-            print(self.metrics['test_same_dom'].get_results())
-
-                
-            #print('Test diffdom loss')
-            #self.test_clients[0].test(self.metrics['test_diff_dom'])
-            #print(self.metrics['test_diff_dom'].get_results())
 
 
             
@@ -117,12 +88,24 @@ class Server:
         """
         This method handles the evaluation on the train clients
         """
-        # TODO: missing code here!
-        raise NotImplementedError
+        self.metrics['eval_train'].reset()
+
+        for client in self.test_clients:
+            client.model.load_state_dict(self.model_params_dict)
+            loss,samples=client.test(self.metrics['eval_train'])
+            print(f"Client {client.name}: loss={loss}  samples={samples}")
+        print(f"Complexive results:{self.metrics['eval_train']}")
 
     def test(self):
         """
             This method handles the test on the test clients
         """
-        # TODO: missing code here!
-        raise NotImplementedError
+        self.metrics['test_same_domain'].reset()
+        self.metrics['test_diff_domain'].reset()
+
+        for client in self.test_clients:
+            client.model.load_state_dict(self.model_params_dict)
+            loss,samples=client.test(self.metrics[client.name])
+            print(f"Client {client.name}: loss={loss}  samples={samples}")
+        print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
+        print(f"Complexive results (diff dom):{self.metrics['test_diff_domain']}")

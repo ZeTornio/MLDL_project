@@ -89,5 +89,4 @@ class Client:
                 samples+=images.shape[0]
                 cumulative_loss += loss.item()
                 self.update_metric(metric, outputs, labels)
-        print(cumulative_loss)
-        print(samples)
+        return cumulative_loss/samples,samples
