@@ -68,7 +68,7 @@ class Client:
         for epoch in range(self.args.num_epochs):
             # TODO: check
             self.run_epoch(epoch,optimizer)
-        return len(self.dataset),copy.deepcopy(self.model.parameters())
+        return self.dataset.__len__(),copy.deepcopy(self.model.parameters())
 
     def test(self, metric):
         """
