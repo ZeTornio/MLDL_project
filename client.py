@@ -75,6 +75,7 @@ class Client:
         This method tests the model on the local dataset of the client.
         :param metric: StreamMetric object
         """
+        self.model.test()
         # TODO: check
         with torch.no_grad():
             for i, (images, labels) in enumerate(self.test_loader):
