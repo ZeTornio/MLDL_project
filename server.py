@@ -101,11 +101,11 @@ class Server:
             This method handles the test on the test clients
         """
         self.metrics['test_same_domain'].reset()
-        self.metrics['test_diff_domain'].reset()
+        self.metrics['test_different_domain'].reset()
 
         for client in self.test_clients:
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics[client.name])
             print(f"Client {client.name}: loss={loss}  samples={samples}")
         print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
-        print(f"Complexive results (diff dom):{self.metrics['test_diff_domain']}")
+        print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
