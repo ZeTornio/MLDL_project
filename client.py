@@ -54,7 +54,6 @@ class Client:
             loss=self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             optimizer.step()
-            #TODO: check
 
     def train(self):
         """
