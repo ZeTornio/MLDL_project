@@ -79,7 +79,11 @@ class Server:
             subset_clients = self.select_clients()
             updates = self.train_round(subset_clients)
             self.update_model(updates)
-
+            #Only to test hyperparameters
+            print(f"Train:{self.eval_train()}")
+            test_results=self.test()
+            print(f"Same domain:{test_results[0]}")
+            print(f"Different domain:{test_results[1]}")
 
             
     
@@ -91,13 +95,14 @@ class Server:
         self.metrics['eval_train'].reset()
 
         for client in self.train_clients:
-            print(f"Evaluating client {client.name}")
+            #print(f"Evaluating client {client.name}")
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics['eval_train'])
-            print(f"\tloss={loss}  samples={samples}")
+            #print(f"\tloss={loss}  samples={samples}")
         
-        self.metrics['eval_train'].get_results()
-        print(f"Complexive results:{self.metrics['eval_train']}")
+        return self.metrics['eval_train'].get_results()
+        #print(f"Complexive results:{self.metrics['eval_train']}")
+        
 
     def test(self):
         """
@@ -107,12 +112,11 @@ class Server:
         self.metrics['test_different_domain'].reset()
 
         for client in self.test_clients:
-            print(f"Evaluating client {client.name}")
+            #print(f"Evaluating client {client.name}")
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics[client.name])
-            print(f"\tloss={loss}  samples={samples}")
+            #print(f"\tloss={loss}  samples={samples}")
 
-        self.metrics['test_same_domain'].get_results()
-        self.metrics['test_different_domain'].get_results()
-        print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
-        print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
+        return self.metrics['test_same_domain'].get_results(),self.metrics['test_different_domain'].get_results()
+        #print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
+        #print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
