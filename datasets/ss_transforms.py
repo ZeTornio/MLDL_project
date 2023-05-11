@@ -45,6 +45,37 @@ class Compose(object):
         format_string += '\n)'
         return format_string
 
+class RandomCompose(object):
+    """Composes several transforms together.
+    Each step if performed with the chosen probability, independently. 
+    Args:
+        transforms (list of ``Transform`` objects): list of transforms to compose.
+        p (float): probability to perform each step.
+    """
+
+    def __init__(self, transforms,p):
+        self.transforms = transforms
+        self.p=p
+
+    def __call__(self, img, lbl=None):
+        if lbl is not None:
+            for t in self.transforms:
+                if np.random.binomial(1,self.p)==1:
+                    img, lbl = t(img, lbl)
+            return img, lbl
+        else:
+            for t in self.transforms:
+                if np.random.binomial(1,self.p)==1:
+                    img = t(img)
+            return img
+
+    def __repr__(self):
+        format_string = self.__class__.__name__ + '(p:'+str(self.p)+')('
+        for t in self.transforms:
+            format_string += '\n'
+            format_string += '    {0}'.format(t)
+        format_string += '\n)'
+        return format_string
 
 class Resize(object):
     """Resize the input PIL Image to the given size.
