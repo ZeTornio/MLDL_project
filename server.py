@@ -80,10 +80,10 @@ class Server:
             updates = self.train_round(subset_clients)
             self.update_model(updates)
             #Only to test hyperparameters
-            print(f"Train:{self.eval_train()}")
+            print(f"Train mIoU:{self.eval_train()['Mean IoU']}")
             test_results=self.test()
-            print(f"Same domain:{test_results[0]}")
-            print(f"Different domain:{test_results[1]}")
+            print(f"Same domain mIoU:{test_results[0]['Mean IoU']}")
+            print(f"Different domain mIoU:{test_results[1]}")
 
             
     
