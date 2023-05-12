@@ -4,7 +4,7 @@ from server import Server
 import json
 
 class Args:
-    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=16,wd=0,m=0.9):
+    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9):
         #Rounds 
         self.num_rounds=num_rounds
         #Epochs per client for each round
