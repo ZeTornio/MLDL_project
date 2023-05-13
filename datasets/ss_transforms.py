@@ -651,7 +651,56 @@ class RandomResizedCrop(object):
         format_string += ', interpolation={0})'.format(interpolate_str)
         return format_string
 
+class RandomCrop():
+    def __init__(self, scale=(0.5, 1.0), ratio=(0.9, 1.1), interpolation=Image.BILINEAR):
+        if (scale[0] > scale[1]) or (ratio[0] > ratio[1]):
+            warnings.warn("range should be of kind (min, max)")
 
+        self.interpolation = interpolation
+        self.scale = scale
+        self.ratio = ratio
+
+    @staticmethod
+    def get_params(img, scale, ratio):
+        """Get parameters for ``crop`` for a random sized crop.
+        Args:
+            img (PIL Image): Image to be cropped.
+            scale (tuple): range of size of the origin size cropped
+            ratio (tuple): range of aspect ratio of the origin aspect ratio cropped
+        Returns:
+            tuple: params (i, j, h, w) to be passed to ``crop`` for a random
+                sized crop.
+        """
+        scale_extr=random.uniform(*scale)
+        width=img.size[0]*scale_extr
+        height=img.size[1]*scale_extr*random.uniform(ratio[0],min(ratio[1],1/(scale_extr)))
+        j=random.uniform(0,img.size[0]-width)
+        i=random.uniform(0,img.size[1]-height)
+        return i,j,height,width
+
+    def __call__(self, img, lbl=None):
+        """
+        Args:
+            img (PIL Image): Image to be cropped and resized.
+        Returns:
+            PIL Image: Randomly cropped and resized image.
+        """
+        i, j, h, w = self.get_params(img, self.scale, self.ratio)
+        if lbl is not None:
+            return F.crop(img, i, j, h, w), \
+                F.crop(lbl, i, j, h, w)
+        else:
+            return F.crop(img, i, j, h, w)
+
+    def __repr__(self):
+        interpolate_str = _pil_interpolation_to_str[self.interpolation]
+        format_string = self.__class__.__name__ + '(size={0}'.format(self.size)
+        format_string += ', scale={0}'.format(tuple(round(s, 4) for s in self.scale))
+        format_string += ', ratio={0}'.format(tuple(round(r, 4) for r in self.ratio))
+        format_string += ', interpolation={0})'.format(interpolate_str)
+        return format_string
+    
+    
 class ColorJitter(object):
     """Randomly change the brightness, contrast and saturation of an image.
     Args:
