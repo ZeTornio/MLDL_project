@@ -76,7 +76,31 @@ class RandomCompose(object):
             format_string += '    {0}'.format(t)
         format_string += '\n)'
         return format_string
+class OneOf(object):
+    """Performs randomly one of the given transforms.
+    Args:
+        transforms (list of ``Transform`` objects): list of transforms to extract from.
+    """
+    def __init__(self, transforms):
+        self.transforms = transforms
 
+    def __call__(self, img, lbl=None):
+        extracted=random.randint(0,len(self.transforms)-1)
+        if lbl is not None:
+            img, lbl = self.transforms[extracted](img, lbl)
+            return img, lbl
+        else:
+            img = self.transforms[extracted](img)
+            return img
+
+    def __repr__(self):
+        format_string = self.__class__.__name__
+        for t in self.transforms:
+            format_string += '\n'
+            format_string += '    {0}'.format(t)
+        format_string += '\n)'
+        return format_string
+    
 class Resize(object):
     """Resize the input PIL Image to the given size.
     Args:
@@ -652,11 +676,9 @@ class RandomResizedCrop(object):
         return format_string
 
 class RandomCrop():
-    def __init__(self, scale=(0.5, 1.0), ratio=(0.9, 1.1), interpolation=Image.BILINEAR):
+    def __init__(self, scale=(0.5, 1.0), ratio=(0.9, 1.1)):
         if (scale[0] > scale[1]) or (ratio[0] > ratio[1]):
             warnings.warn("range should be of kind (min, max)")
-
-        self.interpolation = interpolation
         self.scale = scale
         self.ratio = ratio
 
@@ -797,7 +819,27 @@ class ColorJitter(object):
         format_string += ', hue={0})'.format(self.hue)
         return format_string
 
-
+class EnhanceSunset:
+    def __init__(self, factor=((0.4,0.55),(0.1,0.2),(-0.1,-0.3))):
+        self.factor=factor
+    def __call__(self,img,lbl=None):
+        img[0]*=1+random.uniform(self.factor[0][0],self.factor[0][1])
+        img[1]*=1+random.uniform(self.factor[1][0],self.factor[1][1])
+        img[2]*=1+random.uniform(self.factor[2][0],self.factor[2][1])
+        img[img>1]=1
+        if lbl is not None:
+            return img, lbl
+        else:
+            return img
+class EnhanceCloud:
+    def __init__(self, brightness=(0.7,0.9), contrast=(0.8,0.9), saturation=(0.6,0.9), hue=0):
+        self.jitter=ColorJitter(brightness,contrast,saturation,hue)
+    def __call__(self,img,lbl=None):
+        
+        if lbl is not None:
+            return self.jitter(img, lbl)
+        else:
+            return self.jitter(img)
 class RandomScaleRandomCrop(object):
 
     def __init__(self, crop_size=(1024, 2048), scale=(0.75, 1.0, 1.25, 1.5, 1.75, 2.0)):
