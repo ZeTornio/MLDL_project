@@ -78,6 +78,7 @@ class Server:
         for params in self.args.progressive_lr_m:
             self.args.r=params[2]
             self.args.m=params[3]
+            print(f"HYPERPARAMETERS: lr->{self.args.lr}, m->{self.args.m}\n")
             for r in range(params[0],params[1]):
 
                 print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
@@ -89,7 +90,6 @@ class Server:
                 test_results=self.test()
                 print(f"Same domain mIoU:{test_results[0]['Mean IoU']}")
                 print(f"Different domain mIoU:{test_results[1]['Mean IoU']}\n")
-            print(f"CHANGE IN HYPERPARAMETERS: lr->{self.args.lr}, m->{self.args.m}\n")
 
             
     
