@@ -4,7 +4,7 @@ from server import Server
 import json
 
 class Args:
-    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9):
+    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,change_lr_m=None,change_type='new_val'):
         #Rounds 
         self.num_rounds=num_rounds
         #Epochs per client for each round
@@ -21,6 +21,36 @@ class Args:
         self.wd=wd
         #Momentum
         self.m=m
+        #Change lr and m after tot: format could be 
+        # if from_start: (int rounds, new params) OR (float rounds wrt total, new params) rounds
+        # if from previous: (int rounds, new params) OR (float rounds wrt total, new params)
+        self.change_lr_m=change_lr_m
+        self.progressive_lr_m=self.getParams(change_type)
+
+    def getParams(self,changeType):
+        if self.change_lr_m==None:
+            return [(0,self.num_rounds,self.lr,self.m)]
+        params=[]
+        start=0
+        lr=self.lr
+        m=self.m
+        if changeType=='new_val':
+            for i in range(0,len(self.change_lr_m)):
+                j=min(self.change_lr_m[i][0],self.num_rounds)
+                params.append((start,j,lr,m))
+                lr=self.change_lr_m[i][1]
+                m=self.change_lr_m[i][2] if len(self.change_lr_m[i])==3 else m
+                start=j
+            params.append((j,self.num_rounds,lr,m))
+            return params
+        
+        raise NotImplementedError
+        if changeType=='recursive_abs':
+            return None
+        if changeType=='recursive_fact':
+            return None
+
+    
 
 def createCentralizedServer(args,model,metrics,train_transform,test_transform,root='data/idda'):
     iddaTrain=IDDADataset(root,fileName='train.txt',transform=train_transform,client_name='Centralized server')

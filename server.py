@@ -30,6 +30,7 @@ class Server:
             # TODO: missing code here!
             print(f"\tCLIENT {i + 1}/{len(clients)}: {c}")
             c.model.load_state_dict(self.model_params_dict)
+            c.args=self.args
             num_samples, update = c.train()
             updates.append((num_samples, update))
         return updates
@@ -74,16 +75,21 @@ class Server:
         """
         This method orchestrates the training the evals and tests at rounds level
         """
-        for r in range(self.args.num_rounds):
-            print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
-            subset_clients = self.select_clients()
-            updates = self.train_round(subset_clients)
-            self.update_model(updates)
-            #Only to test hyperparameters
-            print(f"Train mIoU:{self.eval_train()['Mean IoU']}")
-            test_results=self.test()
-            print(f"Same domain mIoU:{test_results[0]['Mean IoU']}")
-            print(f"Different domain mIoU:{test_results[1]['Mean IoU']}")
+        for params in self.args.progressive_lr_m:
+            self.args.r=params[2]
+            self.args.m=params[3]
+            for r in range(params[0],params[1]):
+
+                print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
+                subset_clients = self.select_clients()
+                updates = self.train_round(subset_clients)
+                self.update_model(updates)
+                #Only to test hyperparameters
+                print(f"Train mIoU:{self.eval_train()['Mean IoU']}")
+                test_results=self.test()
+                print(f"Same domain mIoU:{test_results[0]['Mean IoU']}")
+                print(f"Different domain mIoU:{test_results[1]['Mean IoU']}")
+            print(f"CHANGE IN HYPERPARAMETERS: lr->{self.args.lr}, m->{self.args.m}")
 
             
     
