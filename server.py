@@ -88,8 +88,8 @@ class Server:
                 print(f"Train mIoU:{self.eval_train()['Mean IoU']}")
                 test_results=self.test()
                 print(f"Same domain mIoU:{test_results[0]['Mean IoU']}")
-                print(f"Different domain mIoU:{test_results[1]['Mean IoU']}")
-            print(f"CHANGE IN HYPERPARAMETERS: lr->{self.args.lr}, m->{self.args.m}")
+                print(f"Different domain mIoU:{test_results[1]['Mean IoU']}\n")
+            print(f"CHANGE IN HYPERPARAMETERS: lr->{self.args.lr}, m->{self.args.m}\n")
 
             
     
