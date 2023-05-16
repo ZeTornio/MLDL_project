@@ -1,26 +1,46 @@
 from typing import Any
-import numpy as np
 from PIL import Image
-from torch import from_numpy
 from torchvision import transforms
 from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
 import matplotlib.pyplot as plt
-
+from torch import from_numpy
+import json
+import numpy as np
 def showIDDAsample(sample):
     fig=plt.figure()
     fig.add_subplot(2,1,1)
     plt.imshow(sample[0].permute(1,2,0))
     plt.axis('off')
     fig.add_subplot(2,1,2)
-    plt.imshow(sample[1],vmax=16,cmap='jet')
+    plt.imshow(sample[1],vmax=16)
     plt.axis('off')
 
 
-class_eval = [255, 2, 4, 255, 11, 5, 0, 0, 1, 8, 13, 3, 7, 6, 255, 255, 15, 14, 12, 9, 10]
-convert_tensor=transforms.ToTensor()
+class_map={
+    1: 13,  # ego_vehicle : vehicle
+   7: 0,   # road
+   8: 1,   # sidewalk
+   11: 2,  # building
+   12: 3,  # wall
+   13: 4,  # fence
+   17: 5,  # pole
+   18: 5,  # poleGroup: pole
+   19: 6,  # traffic light
+   20: 7,  # traffic sign
+   21: 8,  # vegetation
+   22: 9,  # terrain
+   23: 10,  # sky
+   24: 11,  # person
+   25: 12,  # rider
+   26: 13,  # car : vehicle
+   27: 13,  # truck : vehicle
+   28: 13,  # bus : vehicle
+   32: 14,  # motorcycle
+   33: 15,  # bicycle
+}
 
-class IDDADataset(VisionDataset):
+class GTAVDataset(VisionDataset):
 
     def __init__(self,
                  root: str,
@@ -40,15 +60,14 @@ class IDDADataset(VisionDataset):
 
     @staticmethod
     def get_mapping():
-        classes = class_eval
-        mapping = np.zeros((256,), dtype=np.int64) + 255
-        for i, cl in enumerate(classes):
-            mapping[i] = cl
-        return lambda x: from_numpy(mapping[x])
+        map_classes=np.zeros((256,),dtype=np.int64)
+        for i in range(256):
+            map_classes[i]=class_map[i] if i in class_map else 255
+        return lambda x: from_numpy(map_classes[x])
 
     def __getitem__(self, index: int) -> Any:
-        image=Image.open(self.root+'/images/'+self.list_samples[index]+'.jpg')
-        target=Image.open(self.root+'/labels/'+self.list_samples[index]+'.png')
+        image=Image.open(self.root+'/images/'+self.list_samples[index])
+        target=Image.open(self.root+'/labels/'+self.list_samples[index])
         
         
         if self.transform:

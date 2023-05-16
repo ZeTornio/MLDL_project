@@ -1,7 +1,9 @@
 #IDDA dataset
 /data/idda/images
 /data/idda/labels
-
+/data/GTA5/images
+/data/GTA5/labels
+/data/Cityscapes
 #Caches
 __pycache__/
 *.py[cod]
