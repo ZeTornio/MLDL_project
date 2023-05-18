@@ -20,6 +20,7 @@ class Client:
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
         self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
         self.reduction = HardNegativeMining() if hnm else MeanReduction()
+        self.total_epochs=0
 
     def __str__(self):
         return self.name
@@ -45,7 +46,8 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
-        print(f'\t\tEpoch:{cur_epoch+1}')
+        print(f'\t\tRound epoch:{cur_epoch+1}; Total epochs of client:{self.total_epochs+1}')
+        
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.float32)
             labels = labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.long)
@@ -54,6 +56,11 @@ class Client:
             loss=self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             optimizer.step()
+        self.total_epochs+=1
+        
+        for param_group in optimizer.param_groups:
+            print("\t\t\tlr:"+param_group['lr'])
+            print("\t\t\tm:"+param_group['momentum'])
 
     def train(self):
         """
@@ -62,11 +69,14 @@ class Client:
         :return: length of the local dataset, copy of the model parameters
         """
         self.model.train()
-        optimizer=optim.SGD(self.model.parameters(),lr=self.args.lr,momentum=self.args.m,weight_decay=self.args.wd)
+        optimizer=optim.SGD(self.model.parameters(),lr=self.args.getLr(self.total_epochs),momentum=self.args.getM(self.total_epochs),weight_decay=self.args.wd)
         # TODO: check
         for epoch in range(self.args.num_epochs):
             # TODO: check
             self.run_epoch(epoch,optimizer)
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = self.args.getLr(self.total_epochs)
+                param_group['momentum']=self.args.getM(self.total_epochs)
         return len(self.dataset),copy.deepcopy(self.model.state_dict())
 
     def test(self, metric):
