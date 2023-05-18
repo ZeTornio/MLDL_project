@@ -32,12 +32,12 @@ class Args:
             start=param['from']
             end=param['to'] if 'to' in param else 0
             steps=param['steps']
-            return lambda x: end+(start-end)*pow(1-x/steps,exponent) if x<steps else end
+            return lambda x: start+(end-start)*pow(x/steps,exponent) if x<steps else end
         if self.lr['type']=='cyclical':
             steps=param['period']/2
             min=param['min']
             max=param['max']
-            return lambda x: max+(min-max)*(1-abs(x%(2*steps)-steps)/steps)
+            return lambda x: min+(max-min)*(abs(x%(2*steps)-steps)/steps)
         raise NotImplementedError
         
     
