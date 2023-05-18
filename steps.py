@@ -21,6 +21,25 @@ class Args:
         self.wd=wd
         #Momentum
         self.m=m
+        #Functions to retrieve hyperparameters
+        self.getLr=self.getHyperParamAtEpoch(self.lr)
+        self.getM=self.getHyperParamAtEpoch(self.m)
+    def getHyperParamAtEpoch(self,param):
+        if isinstance(param,float):
+            return lambda x:param
+        if param['type']=='polynomial':
+            exponent=param['exponent'] if 'exponent' in param else 1
+            start=param['from']
+            end=param['to'] if 'to' in param else 0
+            steps=param['steps']
+            return lambda x: end+(start-end)*pow(1-x/steps,exponent) if x<steps else end
+        if self.lr['type']=='cyclical':
+            steps=param['period']/2
+            min=param['min']
+            max=param['max']
+            return lambda x: max+(min-max)*(1-abs(x%(2*steps)-steps)/steps)
+        raise NotImplementedError
+        
     
 
 def createCentralizedServer(args,model,metrics,train_transform,test_transform,root='data/idda'):
