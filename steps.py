@@ -21,7 +21,6 @@ class Args:
         self.wd=wd
         #Momentum
         self.m=m
-
     
 
 def createCentralizedServer(args,model,metrics,train_transform,test_transform,root='data/idda'):
