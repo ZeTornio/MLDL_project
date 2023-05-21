@@ -95,14 +95,14 @@ class Server:
                 self.eval_train(print=False)
                 self.test(print=False)
                 for metric in self.metrics:
-                    print(metric,': mIoU=',self.metrics[metric].get_results()['Mean IoU'])
+                    print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
             if (r+1)%self.args.saveEachRounds==0 and (r+1)!=self.args.num_rounds:
                 torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
                 
         self.eval_train(print=False)
         self.test(print=False)
         for metric in self.metrics:
-            print(metric,': mIoU=',self.metrics[metric].get_results()['Mean IoU'])
+            print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
         torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
 
             
@@ -145,6 +145,6 @@ class Server:
         if print:
             for metric in self.metrics:
                 if metric!='eval_train':
-                    print(self.metrics[metric].get_results())
+                    print(self.metrics[metric])
         #print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
         #print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
