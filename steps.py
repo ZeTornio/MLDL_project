@@ -61,7 +61,7 @@ def createServerStep1(args,model,train_transform,test_transform,root='data/idda'
         }
     iddaTrain=IDDADataset(root,fileName='train.txt',transform=train_transform,client_name='Centralized server')
     iddaTestSame=IDDADataset(root,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
-    iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_different_domain')
+    iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
     train_clients=[Client(args=args,dataset=iddaTrain,model=model)]
     test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
@@ -70,7 +70,7 @@ def createServerStep2(args,model,train_transform,test_transform,root='data/idda'
     metrics = {
             'eval_train': StreamSegMetrics(16, 'eval_train'),
             'test_same_domain': StreamSegMetrics(16, 'test_same_dom'),
-            'test_different_domain': StreamSegMetrics(16, 'test_different_domain')
+            'test_diff_domain': StreamSegMetrics(16, 'test_diff_domain')
         }
     f=open(root+'/train.json')
     clients=json.load(f)
@@ -78,7 +78,7 @@ def createServerStep2(args,model,train_transform,test_transform,root='data/idda'
     for key in clients:
         train_clients.append(Client(args=args,dataset=IDDADataset(root,list_samples=clients[key],transform=train_transform,client_name=key),model=model))
     iddaTestSame=IDDADataset(root,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
-    iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_different_domain')
+    iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
     test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
 
@@ -92,7 +92,7 @@ def createServerStep3(args,model,train_transform,test_transform,rootIdda='data/i
     gtaVtrain=GTAVDataset(rootGta,fileName='train.txt',transform=train_transform,client_name='Gta5 centralized server')
     iddaTrain=IDDADataset(rootIdda,fileName='train.txt',transform=train_transform,client_name='eval_target')
     iddaTestSame=IDDADataset(rootIdda,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
-    iddaTestDiff=IDDADataset(rootIdda,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_different_domain')
+    iddaTestDiff=IDDADataset(rootIdda,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
     train_clients=[Client(args=args,dataset=gtaVtrain,model=model)]
     test_clients=[Client(args=args,dataset=iddaTrain,model=model,test_client=True),Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
