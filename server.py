@@ -1,6 +1,6 @@
 import copy
 from collections import OrderedDict
-
+from datetime import datetime
 import numpy as np
 import torch
 
@@ -14,10 +14,19 @@ class Server:
         self.model = model
         self.metrics = metrics
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
+        self.saveName=self.args.saveFileName
+        if self.saveName==None:
+            time=datetime.now()
+            self.saveName="Test_"+time.strftime("%d-%m_%H:%M")
 
     def select_clients(self):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
         return np.random.choice(self.train_clients, num_clients, replace=False)
+    
+    def loadModel(self,path):
+        self.model.load_state_dict(torch.load(path,map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
+        self.model_params_dict = copy.deepcopy(self.model.state_dict())
+
 
     def train_round(self, clients):
         """
@@ -79,11 +88,13 @@ class Server:
             subset_clients = self.select_clients()
             updates = self.train_round(subset_clients)
             self.update_model(updates)
-            #Only to test hyperparameters
-            print(f"Train mIoU:{self.eval_train()['Mean IoU']}")
-            test_results=self.test()
-            print(f"Same domain mIoU:{test_results[0]['Mean IoU']}")
-            print(f"Different domain mIoU:{test_results[1]['Mean IoU']}\n")
+            if (r+1)%self.args.testEachRounds==0:
+                self.eval_train()
+                self.test()
+                for metric in self.metrics:
+                    print(metric,': mIoU=',self.metrics[metric]['Mean IoU'])
+            if (r+1)%self.args.saveEachRounds==0:
+                torch.save(self.model.state_dict(),self.saveName+"round_"+str(r+1)+".pt")
 
             
     
@@ -108,15 +119,16 @@ class Server:
         """
             This method handles the test on the test clients
         """
-        self.metrics['test_same_domain'].reset()
-        self.metrics['test_different_domain'].reset()
+        for metric in self.metrics:
+            if metric!='eval_train':
+                self.metrics[metric].reset()
 
         for client in self.test_clients:
             #print(f"Evaluating client {client.name}")
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics[client.name])
             #print(f"\tloss={loss}  samples={samples}")
-
-        return self.metrics['test_same_domain'].get_results(),self.metrics['test_different_domain'].get_results()
+        for metric in self.metrics:
+            self.metrics[metric].get_result()
         #print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
         #print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
