@@ -59,8 +59,8 @@ class Client:
         self.total_epochs+=1
         
         for param_group in optimizer.param_groups:
-            print("\t\t\tlr:"+param_group['lr'])
-            print("\t\t\tm:"+param_group['momentum'])
+            print("\t\t\tlr:"+str(param_group['lr']))
+            print("\t\t\tm:"+str(param_group['momentum']))
 
     def train(self):
         """
