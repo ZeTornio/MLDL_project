@@ -3,6 +3,7 @@ from collections import OrderedDict
 from datetime import datetime
 import numpy as np
 import torch
+import os
 
 
 class Server:
@@ -18,6 +19,8 @@ class Server:
         if self.saveName==None:
             time=datetime.now()
             self.saveName="Test_"+time.strftime("%d-%m_%H:%M")
+        if not os.path.exists(self.saveName):
+            os.makedirs(self.saveName)
 
     def select_clients(self):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
@@ -88,13 +91,19 @@ class Server:
             subset_clients = self.select_clients()
             updates = self.train_round(subset_clients)
             self.update_model(updates)
-            if (r+1)%self.args.testEachRounds==0:
+            if (r+1)%self.args.testEachRounds==0 and (r+1)!=self.args.num_rounds:
                 self.eval_train(print=False)
                 self.test(print=False)
                 for metric in self.metrics:
                     print(metric,': mIoU=',self.metrics[metric].get_results()['Mean IoU'])
-            if (r+1)%self.args.saveEachRounds==0:
+            if (r+1)%self.args.saveEachRounds==0 and (r+1)!=self.args.num_rounds:
                 torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
+                
+        self.eval_train(print=False)
+        self.test(print=False)
+        for metric in self.metrics:
+            print(metric,': mIoU=',self.metrics[metric].get_results()['Mean IoU'])
+        torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
 
             
     
