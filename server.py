@@ -92,7 +92,7 @@ class Server:
                 self.eval_train()
                 self.test()
                 for metric in self.metrics:
-                    print(metric,': mIoU=',self.metrics[metric]['Mean IoU'])
+                    print(metric,': mIoU=',self.metrics[metric].get_results()['Mean IoU'])
             if (r+1)%self.args.saveEachRounds==0:
                 torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
 
