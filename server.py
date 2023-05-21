@@ -99,8 +99,8 @@ class Server:
             if (r+1)%self.args.saveEachRounds==0 and (r+1)!=self.args.num_rounds:
                 torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
                 
-        self.eval_train(print=False)
-        self.test(print=False)
+        self.eval_train(printRes=False)
+        self.test(printRes=False)
         for metric in self.metrics:
             print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
         torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
@@ -126,7 +126,7 @@ class Server:
         #print(f"Complexive results:{self.metrics['eval_train']}")
         
 
-    def test(self,print=True):
+    def test(self,printRes=True):
         """
             This method handles the test on the test clients
         """
@@ -142,7 +142,7 @@ class Server:
         for metric in self.metrics:
             if metric!='eval_train':
                 self.metrics[metric].get_results()
-        if print:
+        if printRes:
             for metric in self.metrics:
                 if metric!='eval_train':
                     print(self.metrics[metric])
