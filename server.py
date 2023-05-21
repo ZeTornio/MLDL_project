@@ -108,7 +108,7 @@ class Server:
             
     
 
-    def eval_train(self,print=True):
+    def eval_train(self,printRes=True):
         """
         This method handles the evaluation on the train clients
         """
@@ -121,7 +121,7 @@ class Server:
             #print(f"\tloss={loss}  samples={samples}")
         
         self.metrics['eval_train'].get_results()
-        if print:
+        if printRes:
             print(self.metrics['eval_train'].get_results())
         #print(f"Complexive results:{self.metrics['eval_train']}")
         
