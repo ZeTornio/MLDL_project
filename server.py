@@ -18,7 +18,7 @@ class Server:
         self.saveName=self.args.saveFileName
         if self.saveName==None:
             time=datetime.now()
-            self.saveName="Test_"+time.strftime("%d-%m_%H:%M")
+            self.saveName="Test_"+time.strftime("%d-%m_%H-%M")
         if not os.path.exists(self.saveName):
             os.makedirs(self.saveName)
 
