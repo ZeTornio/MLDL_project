@@ -92,8 +92,8 @@ class Server:
             updates = self.train_round(subset_clients)
             self.update_model(updates)
             if (r+1)%self.args.testEachRounds==0 and (r+1)!=self.args.num_rounds:
-                self.eval_train(print=False)
-                self.test(print=False)
+                self.eval_train(printRes=False)
+                self.test(printRes=False)
                 for metric in self.metrics:
                     print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
             if (r+1)%self.args.saveEachRounds==0 and (r+1)!=self.args.num_rounds:
