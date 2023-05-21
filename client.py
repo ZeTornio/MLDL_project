@@ -47,6 +47,9 @@ class Client:
         :param optimizer: optimizer used for the local training
         """
         print(f'\t\tRound epoch:{cur_epoch+1}; Total epochs of client:{self.total_epochs+1}')
+        for param_group in optimizer.param_groups:
+            print("\t\t\tlr:"+str(param_group['lr']))
+            print("\t\t\tm:"+str(param_group['momentum']))
         
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.float32)
@@ -58,9 +61,7 @@ class Client:
             optimizer.step()
         self.total_epochs+=1
         
-        for param_group in optimizer.param_groups:
-            print("\t\t\tlr:"+str(param_group['lr']))
-            print("\t\t\tm:"+str(param_group['momentum']))
+        
 
     def train(self):
         """
