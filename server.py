@@ -129,6 +129,6 @@ class Server:
             loss,samples=client.test(self.metrics[client.name])
             #print(f"\tloss={loss}  samples={samples}")
         for metric in self.metrics:
-            self.metrics[metric].get_result()
+            self.metrics[metric].get_results()
         #print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
         #print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
