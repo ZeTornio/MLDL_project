@@ -94,7 +94,7 @@ class Server:
                 for metric in self.metrics:
                     print(metric,': mIoU=',self.metrics[metric]['Mean IoU'])
             if (r+1)%self.args.saveEachRounds==0:
-                torch.save(self.model.state_dict(),self.saveName+"round_"+str(r+1)+".pt")
+                torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
 
             
     
