@@ -89,8 +89,8 @@ class Server:
             updates = self.train_round(subset_clients)
             self.update_model(updates)
             if (r+1)%self.args.testEachRounds==0:
-                self.eval_train()
-                self.test()
+                self.eval_train(print=False)
+                self.test(print=False)
                 for metric in self.metrics:
                     print(metric,': mIoU=',self.metrics[metric].get_results()['Mean IoU'])
             if (r+1)%self.args.saveEachRounds==0:
@@ -99,7 +99,7 @@ class Server:
             
     
 
-    def eval_train(self):
+    def eval_train(self,print=True):
         """
         This method handles the evaluation on the train clients
         """
@@ -111,11 +111,13 @@ class Server:
             loss,samples=client.test(self.metrics['eval_train'])
             #print(f"\tloss={loss}  samples={samples}")
         
-        return self.metrics['eval_train'].get_results()
+        self.metrics['eval_train'].get_results()
+        if print:
+            print(self.metrics['eval_train'].get_results())
         #print(f"Complexive results:{self.metrics['eval_train']}")
         
 
-    def test(self):
+    def test(self,print=True):
         """
             This method handles the test on the test clients
         """
@@ -131,5 +133,9 @@ class Server:
         for metric in self.metrics:
             if metric!='eval_train':
                 self.metrics[metric].get_results()
+        if print:
+            for metric in self.metrics:
+                if metric!='eval_train':
+                    print(self.metrics[metric].get_results())
         #print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
         #print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
