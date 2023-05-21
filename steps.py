@@ -61,7 +61,7 @@ def createServerStep1(args,model,train_transform,test_transform,root='data/idda'
         }
     iddaTrain=IDDADataset(root,fileName='train.txt',transform=train_transform,client_name='Centralized server')
     iddaTestSame=IDDADataset(root,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
-    iddaTestDiff=IDDADataset(root,fileName='test_different_dom.txt',transform=test_transform,client_name='test_different_domain')
+    iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_different_domain')
     train_clients=[Client(args=args,dataset=iddaTrain,model=model)]
     test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
