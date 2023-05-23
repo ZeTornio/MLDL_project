@@ -122,7 +122,7 @@ class Server:
         
         self.metrics['eval_train'].get_results()
         if printRes:
-            print("Metric eval_train:\n"+self.metrics['eval_train'])
+            print("Metric eval_train:\n"+str(self.metrics['eval_train']))
         #print(f"Complexive results:{self.metrics['eval_train']}")
         
 
@@ -145,6 +145,6 @@ class Server:
         if printRes:
             for metric in self.metrics:
                 if metric!='eval_train':
-                    print("Metric "+metric+":\n"+self.metrics[metric])
+                    print("Metric "+metric+":\n"+str(self.metrics[metric]))
         #print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
         #print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")
