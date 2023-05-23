@@ -15,7 +15,7 @@ class Server:
         self.model = model
         self.metrics = metrics
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
-        self.saveName=self.args.saveFileName
+        self.saveName=self.args.saveFolder
         if self.saveName==None:
             time=datetime.now()
             self.saveName="Tests/"+time.strftime("%d-%m_%H-%M")

@@ -6,7 +6,7 @@ from utils.stream_metrics import StreamSegMetrics
 import json
 
 class Args:
-    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFileName=None,testEachRounds=None):
+    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None):
         #Rounds 
         self.num_rounds=num_rounds
         #Epochs per client for each round
@@ -28,7 +28,7 @@ class Args:
         self.getM=self.getHyperParamAtEpoch(self.m)
         #Parameters for saving
         self.saveEachRounds=saveEachRounds
-        self.saveFileName=saveFileName
+        self.saveFolder=saveFolder
         self.testEachRounds=testEachRounds
         if saveEachRounds==None:
             self.saveEachRounds=num_rounds
