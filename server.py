@@ -106,7 +106,20 @@ class Server:
         torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
 
             
-    
+    def showSample(self,name=None,index=0):
+        if name==None:
+            return self.train_clients[0].showSample(index)
+        for i in range(len(self.train_clients)):
+            if self.train_clients[i].name==name:
+                self.train_clients[i].showSample(index)
+                return
+        for i in range(len(self.test_clients)):
+            if self.test_clients[i].name==name:
+                self.test_clients[i].showSample(index)
+                return
+        print("Client not found")
+
+
 
     def eval_train(self,printRes=True):
         """

@@ -4,7 +4,7 @@ import torch
 from torch import optim, nn
 from collections import defaultdict
 from torch.utils.data import DataLoader
-
+import matplotlib.pyplot as plt
 from utils.utils import HardNegativeMining, MeanReduction
 
 
@@ -32,13 +32,25 @@ class Client:
         prediction = prediction.cpu().numpy()
         metric.update(labels, prediction)
 
-    def _get_outputs(self, images):
-        raise NotImplementedError
-        if self.args.model == 'deeplabv3_mobilenetv2':
-            return self.model(images)['out']
-        if self.args.model == 'resnet18':
-            return self.model(images)
-        
+    def showSample(self,index=0):
+        if index>=len(self.dataset):
+            print(f"Index out of bounds, the maximum is {len(self.dataset)-1}")
+            return
+        (image,label)=self.dataset[index]
+        image = image.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.float32)
+        self.model.eval()
+        prediction=self.model(torch.unsqueeze(image,0))['out']
+        _, prediction = prediction.max(dim=1)
+        fig=plt.figure()
+        fig.add_subplot(3,1,1)
+        plt.imshow(image.permute(1,2,0))
+        plt.axis('off')
+        fig.add_subplot(3,1,2)
+        plt.imshow(label,vmax=16,cmap='jet')
+        plt.axis('off')
+        fig.add_subplot(3,1,3)
+        plt.imshow(prediction.squeeze(0),vmax=16,cmap='jet')
+        plt.axis('off')
 
     def run_epoch(self, cur_epoch, optimizer):
         """
