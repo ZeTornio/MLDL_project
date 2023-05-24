@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from utils.utils import HardNegativeMining, MeanReduction
 
+          
 
 class Client:
 
@@ -41,16 +42,8 @@ class Client:
         self.model.eval()
         prediction=self.model(torch.unsqueeze(image,0))['out']
         _, prediction = prediction.max(dim=1)
-        fig=plt.figure()
-        fig.add_subplot(3,1,1)
-        plt.imshow(image.permute(1,2,0))
-        plt.axis('off')
-        fig.add_subplot(3,1,2)
-        plt.imshow(label,vmax=16,cmap='jet')
-        plt.axis('off')
-        fig.add_subplot(3,1,3)
-        plt.imshow(prediction.squeeze(0),vmax=16,cmap='jet')
-        plt.axis('off')
+
+        self.dataset.showSample(index,prediction.squeeze(0))
 
     def run_epoch(self, cur_epoch, optimizer):
         """

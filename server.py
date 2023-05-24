@@ -106,9 +106,8 @@ class Server:
         torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
 
             
-    def showSample(self,name=None,index=0):
+    def showClientSample(self,name=None,index=0):
         if name==None:
-            
             self.train_clients[0].model.load_state_dict(self.model_params_dict)
             return self.train_clients[0].showSample(index)
         for i in range(len(self.train_clients)):

@@ -5,17 +5,8 @@ from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
 import matplotlib.pyplot as plt
 from torch import from_numpy
-import json
 import numpy as np
-def showIDDAsample(sample):
-    fig=plt.figure()
-    fig.add_subplot(2,1,1)
-    plt.imshow(sample[0].permute(1,2,0))
-    plt.axis('off')
-    fig.add_subplot(2,1,2)
-    plt.imshow(sample[1],vmax=16)
-    plt.axis('off')
-
+from matplotlib.colors import ListedColormap
 
 class_map={
     1: 13,  # ego_vehicle : vehicle
@@ -39,7 +30,24 @@ class_map={
    32: 14,  # motorcycle
    33: 15,  # bicycle
 }
-
+palette=np.array([
+    [128,64,128],       #road
+    [244,35,232],       #sidewalk
+    [70,70,70],         #building
+    [102,102,156],      #wall
+    [190,153,153],      #fence
+    [153,153,153],      #pole
+    [250,170,30],       #light
+    [220,220,0],        #sign
+    [107,142,35],       #vegetation
+    [152,251,152],      #terrain
+    [70,130,180],       #sky
+    [220,20,60],        #person
+    [255,0,0],          #rider
+    [0,0,142],          #vehicle
+    [0,0,230],          #motorcycle
+    [119,11,32],        #bycicle
+    [0,0,0]] )
 class GTAVDataset(VisionDataset):
 
     def __init__(self,
@@ -79,3 +87,21 @@ class GTAVDataset(VisionDataset):
     def __len__(self) -> int:
         return len(self.list_samples)
     
+    def showSample(self,index=0,prediction=None):
+        cMap=ListedColormap(palette/256)
+        image,label=self[index]
+        k=3
+        if prediction==None:
+            k=2
+        fig=plt.figure(figsize=(10*k*1080/1920,10))
+        fig.add_subplot(1,k,1)
+        plt.imshow(image.permute(1,2,0))
+        plt.axis('off')
+        fig.add_subplot(1,k,2)
+        plt.imshow(label,vmax=16,cmap=cMap,interpolation='none')
+        plt.axis('off')
+        if prediction==None:
+            return
+        fig.add_subplot(1,3,3)
+        plt.imshow(prediction,vmax=16,cmap=cMap,interpolation='none')
+        plt.axis('off')
