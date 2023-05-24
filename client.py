@@ -43,7 +43,7 @@ class Client:
         prediction=self.model(torch.unsqueeze(image,0))['out']
         _, prediction = prediction.max(dim=1)
 
-        self.dataset.showSample(index,prediction.squeeze(0))
+        self.dataset.showSample(index,prediction.squeeze(0).cpu())
 
     def run_epoch(self, cur_epoch, optimizer):
         """
