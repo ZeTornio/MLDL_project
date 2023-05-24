@@ -4,6 +4,8 @@ from client import Client
 from server import Server
 from utils.stream_metrics import StreamSegMetrics
 import json
+from models.deeplabv3 import deeplabv3_mobilenetv2
+import torch
 
 class Args:
     def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None):
@@ -53,7 +55,10 @@ class Args:
         
     
 
-def createServerStep1(args,model,train_transform,test_transform,root='data/idda'):
+def createServerStep1(args,train_transform,test_transform,root='data/idda',model=None):
+    if model==None:
+        model=deeplabv3_mobilenetv2(16)
+    model.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
     metrics = {
             'eval_train': StreamSegMetrics(16, 'eval_train'),
             'test_same_domain': StreamSegMetrics(16, 'test_same_domain'),
@@ -66,7 +71,11 @@ def createServerStep1(args,model,train_transform,test_transform,root='data/idda'
     test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
 
-def createServerStep2(args,model,train_transform,test_transform,root='data/idda'):
+def createServerStep2(args,train_transform,test_transform,root='data/idda',model=None):
+    if model==None:
+        model=deeplabv3_mobilenetv2(16)
+    model.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+
     metrics = {
             'eval_train': StreamSegMetrics(16, 'eval_train'),
             'test_same_domain': StreamSegMetrics(16, 'test_same_dom'),
@@ -82,7 +91,10 @@ def createServerStep2(args,model,train_transform,test_transform,root='data/idda'
     test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
 
-def createServerStep3(args,model,train_transform,test_transform,rootIdda='data/idda',rootGta='data/GTA5'):
+def createServerStep3(args,train_transform,test_transform,rootIdda='data/idda',rootGta='data/GTA5',model=None):
+    if model==None:
+        model=deeplabv3_mobilenetv2(16)
+    model.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
     metrics = {
             'eval_train': StreamSegMetrics(16, 'eval_train'),
             'eval_target': StreamSegMetrics(16, 'eval_target'),
