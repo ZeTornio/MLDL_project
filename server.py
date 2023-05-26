@@ -86,6 +86,8 @@ class Server:
         """
         This method orchestrates the training the evals and tests at rounds level
         """
+        results=np.zeros((int(self.args.num_rounds/self.args.testEachRounds)+1,len(self.metrics)+1))
+        k=0
         for r in range(self.args.num_rounds):
             print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
             subset_clients = self.select_clients()
@@ -94,17 +96,27 @@ class Server:
             if (r+1)%self.args.testEachRounds==0 and (r+1)!=self.args.num_rounds:
                 self.eval_train(printRes=False)
                 self.test(printRes=False)
+                
+                results[k,0]=r
+                j=1
                 for metric in self.metrics:
+                    results[k,j]=self.metrics[metric].results['Mean IoU']
+                    j+=1
                     print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
+                k+=1
             if (r+1)%self.args.saveEachRounds==0 and (r+1)!=self.args.num_rounds:
                 torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
                 
         self.eval_train(printRes=False)
         self.test(printRes=False)
+        results[k,0]=self.args.num_rounds
+        j=1
         for metric in self.metrics:
             print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
+            results[k,j]=self.metrics[metric].results['Mean IoU']
+            j+=1
+        np.savetxt(self.saveName+"/mIoU.csv", results, delimiter=",")
         torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
-
             
     def showClientSample(self,name=None,index=0):
         if name==None:
@@ -129,17 +141,15 @@ class Server:
         This method handles the evaluation on the train clients
         """
         self.metrics['eval_train'].reset()
-
-        for client in self.train_clients:
-            #print(f"Evaluating client {client.name}")
+        for client in self.test_clients:
+            if client.name!='eval_train':
+                continue
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics['eval_train'])
-            #print(f"\tloss={loss}  samples={samples}")
         
         self.metrics['eval_train'].get_results()
         if printRes:
             print("Metric eval_train:\n"+str(self.metrics['eval_train']))
-        #print(f"Complexive results:{self.metrics['eval_train']}")
         
 
     def test(self,printRes=True):
@@ -149,12 +159,11 @@ class Server:
         for metric in self.metrics:
             if metric!='eval_train':
                 self.metrics[metric].reset()
-
         for client in self.test_clients:
-            #print(f"Evaluating client {client.name}")
+            if client.name=='eval_train':
+                continue
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics[client.name])
-            #print(f"\tloss={loss}  samples={samples}")
         for metric in self.metrics:
             if metric!='eval_train':
                 self.metrics[metric].get_results()
@@ -162,5 +171,3 @@ class Server:
             for metric in self.metrics:
                 if metric!='eval_train':
                     print("Metric "+metric+":\n"+str(self.metrics[metric]))
-        #print(f"Complexive results (same dom):{self.metrics['test_same_domain']}")
-        #print(f"Complexive results (diff dom):{self.metrics['test_different_domain']}")

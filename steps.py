@@ -65,10 +65,11 @@ def createServerStep1(args,train_transform,test_transform,root='data/idda',model
             'test_diff_domain': StreamSegMetrics(16, 'test_diff_domain')
         }
     iddaTrain=IDDADataset(root,fileName='train.txt',transform=train_transform,client_name='Centralized server')
+    iddaEvalTrain=IDDADataset(root,fileName='train.txt',transform=test_transform,client_name='eval_train')
     iddaTestSame=IDDADataset(root,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
     iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
     train_clients=[Client(args=args,dataset=iddaTrain,model=model)]
-    test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
+    test_clients=[Client(args=args,dataset=iddaEvalTrain,model=model,test_client=True),Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
 
 def createServerStep2(args,train_transform,test_transform,root='data/idda',model=None):
@@ -84,11 +85,12 @@ def createServerStep2(args,train_transform,test_transform,root='data/idda',model
     f=open(root+'/train.json')
     clients=json.load(f)
     train_clients=[]
+    test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     for key in clients:
+        test_clients.append(Client(args=args,dataset=IDDADataset(root,list_samples=clients[key],transform=test_transform,client_name='eval_train'),model=model))
         train_clients.append(Client(args=args,dataset=IDDADataset(root,list_samples=clients[key],transform=train_transform,client_name=key),model=model))
     iddaTestSame=IDDADataset(root,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
     iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
-    test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
 
 def createServerStep3(args,train_transform,test_transform,rootIdda='data/idda',rootGta='data/GTA5',model=None):
@@ -102,9 +104,10 @@ def createServerStep3(args,train_transform,test_transform,rootIdda='data/idda',r
             'test_diff_domain': StreamSegMetrics(16, 'test_diff_domain')
         }
     gtaVtrain=GTAVDataset(rootGta,fileName='train.txt',transform=train_transform,client_name='Gta5 centralized server')
-    iddaTrain=IDDADataset(rootIdda,fileName='train.txt',transform=train_transform,client_name='eval_target')
+    gtaVevalTrain=GTAVDataset(rootGta,fileName='train.txt',transform=test_transform,client_name='eval_train')
+    iddaTrain=IDDADataset(rootIdda,fileName='train.txt',transform=test_transform,client_name='eval_target')
     iddaTestSame=IDDADataset(rootIdda,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
     iddaTestDiff=IDDADataset(rootIdda,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
     train_clients=[Client(args=args,dataset=gtaVtrain,model=model)]
-    test_clients=[Client(args=args,dataset=iddaTrain,model=model,test_client=True),Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
+    test_clients=[Client(args=args,dataset=gtaVevalTrain,model=model,test_client=True),Client(args=args,dataset=iddaTrain,model=model,test_client=True),Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
