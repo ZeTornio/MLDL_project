@@ -8,12 +8,10 @@ import random
 import numpy as np
 from torchvision.models import resnet18
 
-import datasets.ss_transforms as sstr
-import datasets.np_transforms as nptr
+import utils.ss_transforms as sstr
 
 from torch import nn
 from client import Client
-from datasets.femnist import Femnist
 from server import Server
 from utils.args import get_parser
 from datasets.idda import IDDADataset

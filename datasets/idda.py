@@ -4,7 +4,7 @@ from PIL import Image
 from torch import from_numpy
 from torchvision import transforms
 from torchvision.datasets import VisionDataset
-import datasets.ss_transforms as tr
+import utils.ss_transforms as tr
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 

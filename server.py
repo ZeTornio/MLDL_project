@@ -120,13 +120,8 @@ class Server:
             
     def showClientSample(self,name=None,index=0):
         if name==None:
-            self.train_clients[0].model.load_state_dict(self.model_params_dict)
-            return self.train_clients[0].showSample(index)
-        for i in range(len(self.train_clients)):
-            if self.train_clients[i].name==name:
-                self.train_clients[i].model.load_state_dict(self.model_params_dict)
-                self.train_clients[i].showSample(index)
-                return
+            self.test_clients[0].model.load_state_dict(self.model_params_dict)
+            return self.test_clients[0].showSample(index)
         for i in range(len(self.test_clients)):
             if self.test_clients[i].name==name:
                 self.test_clients[i].model.load_state_dict(self.model_params_dict)
