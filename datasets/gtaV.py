@@ -2,7 +2,7 @@ from typing import Any
 from PIL import Image
 from torchvision import transforms
 from torchvision.datasets import VisionDataset
-import datasets.ss_transforms as tr
+import utils.ss_transforms as tr
 import matplotlib.pyplot as plt
 from torch import from_numpy
 import numpy as np
