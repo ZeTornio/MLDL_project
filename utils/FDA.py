@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import json
 
-def extractStyle(image,n,size=(540,960)):
+def extractStyle(image,n,size):
     if n%2==0:
         raise ValueError("You must use odd numbers >1 as windows for FDA.")
     k=int(n/2)
