@@ -6,7 +6,7 @@ import json
 
 def extractStyle(image,n,size=(540,960)):
     if n%2==0:
-        raise ValueError("You must use odd numbers as windows for FDA.")
+        raise ValueError("You must use odd numbers >1 as windows for FDA.")
     k=int(n/2)
     im_src = Image.open(image)
     converter=sstr.Compose([sstr.Resize(size),sstr.ToTensor()])
@@ -19,7 +19,7 @@ def extractClientsStyles(n,fileName='data/idda/train.json',folder="data/idda/ima
     f=open(fileName)
     clients=json.load(f)
     if n%2==0:
-        raise ValueError("You must use odd numbers as windows for FDA.")
+        raise ValueError("You must use odd numbers >1 as windows for FDA. In applyStyle you can use any odd int smaller than the chosen one here, also 1.")
     pos=torch.zeros((3,int(n/2)+1,int(n/2)+1))
     neg=torch.zeros((3,int(n/2),int(n/2)+1))
     styles={}
