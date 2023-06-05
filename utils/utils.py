@@ -1,5 +1,6 @@
 import torch.nn as nn
 
+
 class HardNegativeMining(nn.Module):
 
     def __init__(self, perc=0.25):
