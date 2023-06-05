@@ -22,6 +22,15 @@ class Server:
         if not os.path.exists(self.saveName):
             os.makedirs(self.saveName)
 
+        self.unsupervised = self.args.unsupervised
+        self.teacher_update = self.args.teacher_update
+        if self.unsupervised:
+            self.teacher_model = copy.deepcopy(model)
+            self.teacher_model.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+            self.teacher_model_params_dict = copy.deepcopy(self.teacher_model.state_dict())
+        else:
+            self.teacher_model=None
+
     def select_clients(self):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
         return np.random.choice(self.train_clients, num_clients, replace=False)
@@ -42,6 +51,8 @@ class Server:
             # TODO: missing code here!
             print(f"\tCLIENT {i + 1}/{len(clients)}: {c}")
             c.model.load_state_dict(self.model_params_dict)
+            if self.unsupervised:
+                c.teacher_model.load_state_dict(self.teacher_model_params_dict)
             num_samples, update = c.train()
             updates.append((num_samples, update))
         return updates
@@ -76,10 +87,16 @@ class Server:
 
         return averaged_sol_n
     
-    def update_model(self, updates):
+    def update_models(self, updates, round):
         averaged_parameters = self.aggregate(updates)
         self.model.load_state_dict(averaged_parameters, strict=False)
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
+
+        if self.unsupervised == False or self.teacher_update == None:
+            return  
+        if round % self.teacher_update == 0:
+            self.teacher_model.load_state_dict(averaged_parameters, strict=False)
+            self.techer_model_params_dict = copy.deepcopy(self.teacher_model.state_dict())
         
 
     def train(self):
@@ -92,7 +109,7 @@ class Server:
             print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
             subset_clients = self.select_clients()
             updates = self.train_round(subset_clients)
-            self.update_model(updates)
+            self.update_models(updates, r+1)
             if (r+1)%self.args.testEachRounds==0 and (r+1)!=self.args.num_rounds:
                 self.eval_train(printRes=False)
                 self.test(printRes=False)

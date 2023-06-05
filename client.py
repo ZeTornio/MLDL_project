@@ -5,13 +5,13 @@ from torch import optim, nn
 from collections import defaultdict
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-from utils.utils import HardNegativeMining, MeanReduction
+from utils.utils import HardNegativeMining, MeanReduction, SelfTrainingLoss
 
           
 
 class Client:
 
-    def __init__(self, args,dataset, model, test_client=False,hnm=False):
+    def __init__(self, args,dataset, model, teacher_model=None, test_client=False, hnm=False):
         self.args=args
         self.dataset = dataset
         self.name = self.dataset.client_name
@@ -19,8 +19,11 @@ class Client:
         self.train_loader = DataLoader(self.dataset, batch_size=args.bs, shuffle=True, drop_last=True) \
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
-        self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
+        self.unsupervised = self.args.unsupervised
+        self.teacher_model = teacher_model if self.unsupervised else None
+        self.train_criterion = SelfTrainingLoss() if self.unsupervised else nn.CrossEntropyLoss(ignore_index=255, reduction='none') 
         self.reduction = HardNegativeMining() if hnm else MeanReduction()
+        self.test_criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none') 
         self.total_epochs=0
 
     def __str__(self):
@@ -45,6 +48,15 @@ class Client:
 
         self.dataset.showSample(index,prediction.squeeze(0).cpu())
 
+    def get_loss(self, outputs, labels, images):
+
+        if self.unsupervised:
+            teacher_predictions = self.teacher_model(images)['out']
+            return self.train_criterion(outputs, teacher_predictions)
+        else:
+            return self.reduction(self.train_criterion(outputs,labels),labels)
+
+
     def run_epoch(self, cur_epoch, optimizer):
         """
         This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
@@ -61,7 +73,7 @@ class Client:
             labels = labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.long)
             optimizer.zero_grad()
             outputs=self.model(images)['out']
-            loss=self.reduction(self.criterion(outputs,labels),labels)
+            loss = self.get_loss(outputs, labels, images)
             loss.backward()
             optimizer.step()
         self.total_epochs+=1
@@ -100,7 +112,7 @@ class Client:
                 images = images.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.float32)
                 labels = labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'), dtype=torch.long)
                 outputs=self.model(images)['out']
-                loss=self.reduction(self.criterion(outputs,labels),labels)
+                loss=self.reduction(self.test_criterion(outputs,labels),labels)
                 samples+=images.shape[0]
                 cumulative_loss += loss.item()
                 self.update_metric(metric, outputs, labels)
