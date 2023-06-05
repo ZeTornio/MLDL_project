@@ -103,7 +103,7 @@ class Server:
         """
         This method orchestrates the training the evals and tests at rounds level
         """
-        results=np.zeros((int(self.args.num_rounds/self.args.testEachRounds)+1,len(self.metrics)+1))
+        results=np.zeros((int(self.args.num_rounds/self.args.testEachRounds)+(1 if self.args.num_rounds%self.args.testEachRounds!=0 else 0),len(self.metrics)+1))
         k=0
         for r in range(self.args.num_rounds):
             print(f"ROUND {r + 1}/{self.args.num_rounds}: Training {self.args.clients_per_round} Clients...")
