@@ -49,9 +49,7 @@ class SelfTrainingLoss(nn.Module):
 
     def get_image_mask(self, prob, pseudo_lab):
         max_prob = prob.detach().clone().max(0)[0]
-        mask_prob = max_prob > self.conf_th if 0. < self.conf_th < 1. else torch.zeros(max_prob.size(),
-                                                                                       dtype=torch.bool).to(
-            max_prob.device)
+        mask_prob = max_prob > self.conf_th if 0. < self.conf_th < 1. else torch.zeros(max_prob.size(),dtype=torch.bool).to(max_prob.device)
         
         
         mask_topk = torch.zeros(max_prob.size(), dtype=torch.bool).to(max_prob.device)
