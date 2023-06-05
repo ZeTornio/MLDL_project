@@ -38,6 +38,9 @@ class Server:
     def loadModel(self,path):
         self.model.load_state_dict(torch.load(path,map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
+        if self.unsupervised: 
+            self.teacher_model.load_state_dict(torch.load(path,map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
+            self.teacher_model_params_dict = copy.deepcopy(self.model.state_dict())
 
 
     def train_round(self, clients):
