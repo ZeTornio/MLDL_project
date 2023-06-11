@@ -88,12 +88,13 @@ def createServerStep2(args,train_transform,test_transform,root='data/idda',model
     f=open(root+'/train.json')
     clients=json.load(f)
     train_clients=[]
+    iddaTestSame=IDDADataset(root,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
+    iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
     test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     for key in clients:
         test_clients.append(Client(args=args,dataset=IDDADataset(root,list_samples=clients[key],transform=test_transform,client_name='eval_train'),model=model))
         train_clients.append(Client(args=args,dataset=IDDADataset(root,list_samples=clients[key],transform=train_transform,client_name=key),model=model))
-    iddaTestSame=IDDADataset(root,fileName='test_same_dom.txt',transform=test_transform,client_name='test_same_domain')
-    iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
+    
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
 
 def createServerStep3(args,train_transform,test_transform,rootIdda='data/idda',rootGta='data/GTA5',model=None):
