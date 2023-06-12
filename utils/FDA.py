@@ -69,8 +69,8 @@ class applyFDAstyles(object):
         Returns:
             PIL Image: Randomly flipped image.
         """
-        key=np.random.choice(list(self.styles.keys()), 1)
-        style=self.styles[key[0]]
+        key=np.random.choice(list(self.styles.keys()))
+        style=self.styles[key]
         if lbl is not None:
             return applyStyle(img,style,self.n), lbl
         else:
