@@ -44,6 +44,7 @@ def extractAvgStyleTxt(n,fileName='data/idda/train.txt',folder="data/idda/images
     pos=torch.zeros((3,int(n/2)+1,int(n/2)+1))
     neg=torch.zeros((3,int(n/2),int(n/2)+1))
     styles={}
+    styles['SingleStyle']={}
     f = open(fileName, "r") 
     samples_from_file=[x for x in f.read().split('\n') if x != '']
     for img in samples_from_file:
@@ -52,8 +53,8 @@ def extractAvgStyleTxt(n,fileName='data/idda/train.txt',folder="data/idda/images
         neg+=negImg
     pos/=len(samples_from_file)
     neg/=len(samples_from_file)
-    styles['pos']=pos.clone()
-    styles['neg']=neg.clone()
+    styles['SingleStyle']['pos']=pos.clone()
+    styles['SingleStyle']['neg']=neg.clone()
     return styles.copy()
 
 def applyStyle(img,style,n):
