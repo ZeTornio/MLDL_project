@@ -38,6 +38,24 @@ def extractClientsStyles(n,fileName='data/idda/train.json',folder="data/idda/ima
         styles[client]['neg']=neg.clone()
     return styles.copy()
 
+def extractAvgStyleTxt(n,fileName='data/idda/train.txt',folder="data/idda/images/",ext='.jpg',size=(540,960)):
+    if n%2==0:
+        raise ValueError("You must use odd numbers >1 as windows for FDA. In applyStyle you can use any odd int smaller than the chosen one here, also 1.")
+    pos=torch.zeros((3,int(n/2)+1,int(n/2)+1))
+    neg=torch.zeros((3,int(n/2),int(n/2)+1))
+    styles={}
+    f = open(fileName, "r") 
+    samples_from_file=[x for x in f.read().split('\n') if x != '']
+    for img in samples_from_file:
+        posImg,negImg=extractStyle(folder+img+ext,n,size)
+        pos+=posImg
+        neg+=negImg
+    pos/=len(samples_from_file)
+    neg/=len(samples_from_file)
+    styles['pos']=pos.clone()
+    styles['neg']=neg.clone()
+    return styles.copy()
+
 def applyStyle(img,style,n):
     if n%2==0:
         raise ValueError("You must use odd numbers as windows for FDA.")
