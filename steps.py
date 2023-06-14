@@ -92,7 +92,7 @@ def createServerStep2(args,train_transform,test_transform,root='data/idda',model
     iddaTestDiff=IDDADataset(root,fileName='test_diff_dom.txt',transform=test_transform,client_name='test_diff_domain')
     test_clients=[Client(args=args,dataset=iddaTestDiff,model=model,test_client=True),Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]
     for key in clients:
-        test_clients.append(Client(args=args,dataset=IDDADataset(root,list_samples=clients[key],transform=test_transform,client_name='eval_train'),model=model))
+        test_clients.append(Client(args=args,dataset=IDDADataset(root,list_samples=clients[key],transform=test_transform,client_name='eval_train'),model=model,test_client=True))
         train_clients.append(Client(args=args,dataset=IDDADataset(root,list_samples=clients[key],transform=train_transform,client_name=key),model=model))
     
     return Server(args=args,train_clients=train_clients,test_clients=test_clients,model=model,metrics=metrics)
@@ -136,7 +136,7 @@ def createServerStep4(args,train_transform,test_transform, rootIdda='data/idda',
                   Client(args=args,dataset=iddaTestSame,model=model,test_client=True)]   
     for key in clients:
         test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name='eval_train'),
-                                   model=model, teacher_model=copy.deepcopy(model)))
+                                   model=model, teacher_model=copy.deepcopy(model),test_client=True))
         train_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=train_transform,client_name=key),
                                     model=model, teacher_model=copy.deepcopy(model)))
     
