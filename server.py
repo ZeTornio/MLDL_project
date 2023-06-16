@@ -31,9 +31,25 @@ class Server:
         else:
             self.teacher_model=None
 
+        self.clientsDistribution=np.ones(len(self.train_clients))
+        if self.args.distribution=='uniform':
+            self.clientsDistribution=np.random.uniform(1,self.args.distributionParam,len(self.train_clients))
+        if self.args.distribution=='binomial':
+            self.clientsDistribution=np.random.binomial(1,0.25,len(self.train_clients))+0.001
+
+    def updateClientProb(self):
+        if self.args.distribution=='binomial':
+            for i in range(len(self.train_clients)):
+                if self.clientsDistribution[i]<0.1:
+                    self.clientsDistribution[i]=np.random.binomial(1,self.args.distributionParam,1)+0.001
+                else:
+                    self.clientsDistribution[i]=np.random.binomial(1,1-self.args.distributionParam,1)+0.001
     def select_clients(self):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
-        return np.random.choice(self.train_clients, num_clients, replace=False)
+        k= np.random.choice(self.train_clients, num_clients, replace=False,p=self.clientsDistribution/sum(self.clientsDistribution))
+        self.updateClientProb()
+        return k
+
     
     def loadModel(self,path):
         self.model.load_state_dict(torch.load(path,map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))

@@ -9,7 +9,7 @@ import torch
 import copy
 
 class Args:
-    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False):
+    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None):
         #Rounds 
         self.num_rounds=num_rounds
         #Epochs per client for each round
@@ -39,6 +39,16 @@ class Args:
             self.testEachRounds=num_rounds
         self.unsupervised = unsupervised
         self.teacher_update = teacher_update    
+        self.distribution=distribution
+        self.distributionParam=distributionParam
+        #distribution param must be a>1 for the uniform, extracted in [1,a]
+        #distribution param must be p in (0,1) for the bernoulli.
+        if self.distribution not in ['constant','uniform','binomial']:
+            raise NotImplementedError
+        if self.distribution=='uniform' and self.distributionParam==None:
+            self.distributionParam=20
+        elif self.distribution=='binomial' and self.distributionParam==None:
+            self.distributionParam=1/4
 
     def getHyperParamAtEpoch(self,param):
         if isinstance(param,float):
