@@ -133,7 +133,7 @@ class Server:
                 self.eval_train(printRes=False)
                 self.test(printRes=False)
                 
-                results[k,0]=r
+                results[k,0]=r+1
                 j=1
                 for metric in self.metrics:
                     results[k,j]=self.metrics[metric].results['Mean IoU']
