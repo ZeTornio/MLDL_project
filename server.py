@@ -173,7 +173,7 @@ class Server:
         """
         self.metrics['eval_train'].reset()
         for client in self.test_clients:
-            if client.name!='eval_train':
+            if client.name.find('eval_train')>=0:
                 continue
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics['eval_train'])
@@ -197,7 +197,7 @@ class Server:
             metr=client.name
             if client.name.find('-')>0:
                 metr=client.name[:client.name.find('-')]
-            loss,samples=client.test(self.metrics[client.name ] )
+            loss,samples=client.test(self.metrics[metr] )
         for metric in self.metrics:
             if metric!='eval_train':
                 self.metrics[metric].get_results()
