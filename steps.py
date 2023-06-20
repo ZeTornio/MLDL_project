@@ -152,7 +152,7 @@ def createServerStep4(args,train_transform,test_transform, rootIdda='data/idda',
     
     return Server(args=args,train_clients=train_clients,test_clients=test_clients, model=model,metrics=metrics)
 
-def createServerStep4(args,train_transform,test_transform, rootIdda='data/idda', model=None):
+def createServerStep5clustering(args,train_transform,test_transform, rootIdda='data/idda', model=None):
     if model==None:
         model = deeplabv3_mobilenetv2(16)
     model.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
