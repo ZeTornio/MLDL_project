@@ -130,25 +130,25 @@ class Server:
             updates = self.train_round(subset_clients)
             self.update_models(updates, r+1)
             if (r+1)%self.args.testEachRounds==0 and (r+1)!=self.args.num_rounds:
-                self.eval_train(printRes=False)
-                self.test(printRes=False)
+                self.eval_train(printRes=True)
+                self.test(printRes=True)
                 
                 results[k,0]=r+1
                 j=1
                 for metric in self.metrics:
                     results[k,j]=self.metrics[metric].results['Mean IoU']
                     j+=1
-                    print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
+                    #print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
                 k+=1
             if (r+1)%self.args.saveEachRounds==0 and (r+1)!=self.args.num_rounds:
                 torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
                 
-        self.eval_train(printRes=False)
-        self.test(printRes=False)
+        self.eval_train(printRes=True)
+        self.test(printRes=True)
         results[k,0]=self.args.num_rounds
         j=1
         for metric in self.metrics:
-            print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
+            #print(metric,': mIoU=',self.metrics[metric].results['Mean IoU'])
             results[k,j]=self.metrics[metric].results['Mean IoU']
             j+=1
         np.savetxt(self.saveName+"/mIoU.csv", results, delimiter=",")
