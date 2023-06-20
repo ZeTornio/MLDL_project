@@ -4,6 +4,7 @@ import numpy as np
 import torch.nn.functional as F
 import random
 
+
 class HardNegativeMining(nn.Module):
 
     def __init__(self, perc=0.25):
@@ -24,6 +25,16 @@ class MeanReduction:
         x = x[target != 255]
         return x.mean()
     
+class weightedMeanReduction():
+    def __init__(self,weights):
+        self.weights=weights
+    def __call__(self, x, target):
+        sum=0
+        classes=target.unique()
+        classes=classes[classes!=255]
+        for i in classes:
+            sum+=x[target==i].sum()*self.weights[i]
+        return sum/x[target!=255].shape[0]
 
 class MeanReductionPerClass():
     def __call__(self, x, target):
@@ -31,8 +42,6 @@ class MeanReductionPerClass():
         classes=target.unique()
         classes=classes[classes!=255]
         for i in classes:
-            print(i)
-            print(x[target==i].mean())
             sum+=x[target==i].mean()
         return sum/len(classes)
 
@@ -44,9 +53,6 @@ class MeanReductionInverseClassFrequency():
         classes=target.unique()
         classes=classes[classes!=255]
         for i in classes:
-            print(i)
-            print(x[target==i].mean())
-            print(x[target==i].shape[0])
             sum+=x[target==i].mean()*(x[target!=255].shape[0]/x[target==i].shape[0])**self.k
         return sum/len(classes)
     

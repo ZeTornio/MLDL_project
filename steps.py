@@ -7,9 +7,10 @@ import json
 from models.deeplabv3 import deeplabv3_mobilenetv2
 import torch
 import copy
+from utils.utils import HardNegativeMining, MeanReduction, MeanReductionPerClass, MeanReductionInverseClassFrequency, weightedMeanReduction
 
 class Args:
-    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None, reduction='mean'):
+    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None, reduction='mean',reductionParam=None):
         #Rounds 
         self.num_rounds=num_rounds
         #Epochs per client for each round
@@ -49,8 +50,23 @@ class Args:
             self.distributionParam=20
         elif self.distribution=='binomial' and self.distributionParam==None:
             self.distributionParam=1/4
-
         self.reduction=reduction
+        self.reductionParam=reductionParam
+
+    def get_reduction(self):
+        match self.reduction:
+            case 'mean':
+                return MeanReduction()
+            case 'hnm':
+                return HardNegativeMining()
+            case 'meanClasses':
+                return MeanReductionPerClass()
+            case 'frequencyClass':
+                return MeanReductionInverseClassFrequency(self.reductionParam)
+            case 'weightedMean':
+                return weightedMeanReduction(self.distributionParam)
+            case _:
+                return NotImplementedError
 
     def getHyperParamAtEpoch(self,param):
         if isinstance(param,float):
