@@ -162,25 +162,25 @@ def createServerStep5clustering(args,train_transform,test_transform, rootIdda='d
             'test_diff_domain': StreamSegMetrics(16, 'test_diff_domain')
         }
     train_clients=[]
+    test_clients=[] 
     f=open(rootIdda+'/train.json')
     clients=json.load(f)
     for key in clients:
-        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name='eval_train-'),
+        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name=('eval_train-'+key)),
                                    model=model, teacher_model=copy.deepcopy(model),test_client=True))
         train_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=train_transform,client_name=key),
                                     model=model, teacher_model=copy.deepcopy(model)))
     f.close()
-    test_clients=[] 
     f=open(rootIdda+'/test_same_dom.json')
     clients=json.load(f)
     for key in clients:
-        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name='test_same_domain-'),
+        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name=('test_same_domain-'+key)),
                                    model=model, teacher_model=copy.deepcopy(model),test_client=True))
     f.close()
     f=open(rootIdda+'/test_diff_dom.json')
     clients=json.load(f)
     for key in clients:
-        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name='test_diff_domain-'),
+        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name=('test_diff_domain-'+key)),
                                    model=model, teacher_model=copy.deepcopy(model),test_client=True))
     f.close()
     return Server(args=args,train_clients=train_clients,test_clients=test_clients, model=model,metrics=metrics)
