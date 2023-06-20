@@ -173,7 +173,7 @@ class Server:
         """
         self.metrics['eval_train'].reset()
         for client in self.test_clients:
-            if client.name.find('eval_train')>=0:
+            if client.name.find('eval_train')<0:
                 continue
             client.model.load_state_dict(self.model_params_dict)
             loss,samples=client.test(self.metrics['eval_train'])
