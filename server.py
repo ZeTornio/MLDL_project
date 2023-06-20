@@ -191,7 +191,7 @@ class Server:
             if metric!='eval_train':
                 self.metrics[metric].reset()
         for client in self.test_clients:
-            if client.name=='eval_train':
+            if client.name.find('eval_train')>=0:
                 continue
             client.model.load_state_dict(self.model_params_dict)
             metr=client.name
