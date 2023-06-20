@@ -64,7 +64,7 @@ class Args:
             case 'frequencyClass':
                 return MeanReductionInverseClassFrequency(self.reductionParam)
             case 'weightedMean':
-                return weightedMeanReduction(self.distributionParam)
+                return weightedMeanReduction(self.reductionParam)
             case _:
                 return NotImplementedError
 
