@@ -9,7 +9,7 @@ import torch
 import copy
 
 class Args:
-    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None):
+    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None, reduction='mean'):
         #Rounds 
         self.num_rounds=num_rounds
         #Epochs per client for each round
@@ -49,6 +49,8 @@ class Args:
             self.distributionParam=20
         elif self.distribution=='binomial' and self.distributionParam==None:
             self.distributionParam=1/4
+
+        self.reduction=reduction
 
     def getHyperParamAtEpoch(self,param):
         if isinstance(param,float):

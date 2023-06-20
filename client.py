@@ -5,13 +5,13 @@ from torch import optim, nn
 from collections import defaultdict
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-from utils.utils import HardNegativeMining, MeanReduction, SelfTrainingLoss
+from utils.utils import HardNegativeMining, MeanReduction, SelfTrainingLoss, MeanReductionPerClass, MeanReductionInverseClassFrequency
 
           
 
 class Client:
 
-    def __init__(self, args,dataset, model, teacher_model=None, test_client=False, hnm=False):
+    def __init__(self, args,dataset, model, teacher_model=None, test_client=False):
         self.args=args
         self.dataset = dataset
         self.name = self.dataset.client_name
@@ -22,7 +22,15 @@ class Client:
         self.unsupervised = self.args.unsupervised
         self.teacher_model = teacher_model if self.unsupervised else None
         self.train_criterion = SelfTrainingLoss() if self.unsupervised else nn.CrossEntropyLoss(ignore_index=255, reduction='none') 
-        self.reduction = HardNegativeMining() if hnm else MeanReduction()
+        
+        if args.reduction=='mean':
+            self.reduction =  MeanReduction()
+        elif args.reduction=='hnm':
+            self.reduction =  HardNegativeMining()
+        elif args.reduction=='meanClasses':
+            self.reduction= MeanReductionPerClass()
+        elif args.reduction.find('frequencyClass'): #we want as param frequencyClass_k
+            self.reduction= MeanReductionInverseClassFrequency(float(args.reduction[args.reduction.find('_')+1:]))
         self.test_criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none') 
         self.total_epochs=0
 
