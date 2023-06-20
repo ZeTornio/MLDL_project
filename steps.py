@@ -151,3 +151,36 @@ def createServerStep4(args,train_transform,test_transform, rootIdda='data/idda',
                                     model=model, teacher_model=copy.deepcopy(model)))
     
     return Server(args=args,train_clients=train_clients,test_clients=test_clients, model=model,metrics=metrics)
+
+def createServerStep4(args,train_transform,test_transform, rootIdda='data/idda', model=None):
+    if model==None:
+        model = deeplabv3_mobilenetv2(16)
+    model.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+    metrics = {
+            'eval_train': StreamSegMetrics(16, 'eval_train'),
+            'test_same_domain': StreamSegMetrics(16, 'test_same_domain'),
+            'test_diff_domain': StreamSegMetrics(16, 'test_diff_domain')
+        }
+    train_clients=[]
+    f=open(rootIdda+'/train.json')
+    clients=json.load(f)
+    for key in clients:
+        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name='eval_train-'),
+                                   model=model, teacher_model=copy.deepcopy(model),test_client=True))
+        train_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=train_transform,client_name=key),
+                                    model=model, teacher_model=copy.deepcopy(model)))
+    f.close()
+    test_clients=[] 
+    f=open(rootIdda+'/test_same_dom.json')
+    clients=json.load(f)
+    for key in clients:
+        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name='test_same_domain-'),
+                                   model=model, teacher_model=copy.deepcopy(model),test_client=True))
+    f.close()
+    f=open(rootIdda+'/test_diff_dom.json')
+    clients=json.load(f)
+    for key in clients:
+        test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name='test_diff_domain-'),
+                                   model=model, teacher_model=copy.deepcopy(model),test_client=True))
+    f.close()
+    return Server(args=args,train_clients=train_clients,test_clients=test_clients, model=model,metrics=metrics)
