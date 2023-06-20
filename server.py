@@ -194,7 +194,10 @@ class Server:
             if client.name=='eval_train':
                 continue
             client.model.load_state_dict(self.model_params_dict)
-            loss,samples=client.test(self.metrics[client.name])
+            metr=client.name
+            if client.name.find('-')>0:
+                metr=client.name[:client.name.find('-')]
+            loss,samples=client.test(self.metrics[client.name ] )
         for metric in self.metrics:
             if metric!='eval_train':
                 self.metrics[metric].get_results()
