@@ -53,8 +53,8 @@ class MeanReductionInverseClassFrequency():
         classes=target.unique()
         classes=classes[classes!=255]
         for i in classes:
-            sum+=x[target==i].sum()*(x[target!=255].shape[0]/x[target==i].shape[0])**self.k
-        return sum/x[target!=255].shape[0]
+            sum+=x[target==i].sum()*(1/x[target==i].shape[0])**self.k*(x[target!=255].shape[0])**(self.k-1)
+        return sum
     
 def set_seed(random_seed):
         random.seed(random_seed)
