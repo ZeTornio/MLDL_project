@@ -9,7 +9,7 @@ from cluster import createClusters
 
 class Server:
 
-    def __init__(self, args, train_clients, test_clients, model, metrics, clusters):
+    def __init__(self, args, train_clients, test_clients, model, metrics, clusters=None):
         self.args=args
         self.train_clients = train_clients
         self.test_clients = test_clients
@@ -48,7 +48,7 @@ class Server:
         for cluster in clusters:
             submodels[cluster] = OrderedDict()
             for key in classifier_keys:
-                submodels[cluster][key] = self.model_params_dict[key]
+                submodels[cluster][key] = self.model_params_dict[key] #CHECK IF COPY>.DEEPCOPY
         return submodels
 
     def updateClientProb(self):
@@ -71,18 +71,19 @@ class Server:
         if self.unsupervised: 
             self.teacher_model.load_state_dict(torch.load(path,map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
             self.teacher_model_params_dict = copy.deepcopy(self.model.state_dict())
+        #UPDATE IT 
 
     '''Merge of global state_dict and cluster-specific state_dict
        :param: state_dict of the global model and client name
        :return: client state_dict'''
-    def client_state_dict(self, shared_state_dict, client_name):
+    def client_state_dict(self, shared_state_dict, client_name, teacher=False):
         if not self.args.clustering:
             return shared_state_dict
         state_dict = copy.deepcopy(shared_state_dict)
         cluster = self.clusters.get(client_name)
         for key in state_dict:
             if key in self.submodels[cluster]:
-                state_dict[key] = self.submodels[cluster][key]
+                state_dict[key] = self.submodels[cluster][key] if teacher==False else self.sub_teachers[cluster][key]
         return state_dict
 
     def train_round(self, clients):
@@ -98,7 +99,7 @@ class Server:
             client_model = self.client_state_dict(self.model_params_dict, c.name)
             c.model.load_state_dict(client_model)
             if self.unsupervised:
-                client_teacher = self.client_state_dict(self.teacher_model_params_dict, c.name)
+                client_teacher = self.client_state_dict(self.teacher_model_params_dict, c.name,teacher=True)
                 c.teacher_model.load_state_dict(client_teacher)
             num_samples, update = c.train()
             updates.append((c.name, num_samples, update))
@@ -134,7 +135,7 @@ class Server:
         
          
 
-    def aggregate(self, updates, teacher=False):
+    def aggregate(self, updates):
         """
         This method handles the FedAvg aggregation
         :param updates: updates received from the clients
