@@ -211,5 +211,5 @@ def createServerStep5clustering(args,train_transform,test_transform, rootIdda='d
         test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name=('test_diff_domain-'+key)),
                                    model=model, teacher_model=copy.deepcopy(model),test_client=True))
     f.close()
-    clusters = createClusters(ks=args.num_clusters, params=args.cluster_param, FDAwindow=args.FDAwindow, root=rootIdda)
+    clusters = createClusters(ks=args.num_clusters, params=args.cluster_param, FDAwindow=args.FDAwindow, root=rootIdda+'/')
     return Server(args=args,train_clients=train_clients,test_clients=test_clients, model=model,metrics=metrics, clusters=clusters)
