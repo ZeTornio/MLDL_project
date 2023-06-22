@@ -58,7 +58,7 @@ class Args:
         self.cluster_param=cluster_param
         self.FDAwindow=FDAwindow
 
-        if self.cluster_param not in ["FDA", "mean", "mean_variance"]:
+        if self.cluster_param not in ["FDA", "mean", "mean_variance", None]:
             raise ValueError("Choose between: FDA, mean, mean_variance")
         if self.cluster_param=="FDA" and self.FDAwindow == 0:
             raise ValueError("You must specify window value")
