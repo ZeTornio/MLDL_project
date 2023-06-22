@@ -8,9 +8,10 @@ from models.deeplabv3 import deeplabv3_mobilenetv2
 import torch
 import copy
 from utils.utils import HardNegativeMining, MeanReduction, MeanReductionPerClass, MeanReductionInverseClassFrequency, weightedMeanReduction
+from utils.cluster import createClusters
 
 class Args:
-    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None, reduction='mean',reductionParam=None):
+    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None, reduction='mean',reductionParam=None, clustering=False, num_clusters=None, cluster_param=None, FDAwindow=0):
         #Rounds 
         self.num_rounds=num_rounds
         #Epochs per client for each round
@@ -52,6 +53,15 @@ class Args:
             self.distributionParam=1/4
         self.reduction=reduction
         self.reductionParam=reductionParam
+        self.clustering=clustering
+        self.num_clusters=num_clusters 
+        self.cluster_param=cluster_param
+        self.FDAwindow=FDAwindow
+
+        if self.cluster_param not in ["FDA", "mean", "mean_variance"]:
+            raise ValueError("Choose between: FDA, mean, mean_variance")
+        if self.cluster_param=="FDA" and self.FDAwindow == 0:
+            raise ValueError("You must specify window value")
 
     def get_reduction(self):
         match self.reduction:
@@ -201,4 +211,5 @@ def createServerStep5clustering(args,train_transform,test_transform, rootIdda='d
         test_clients.append(Client(args=args,dataset=IDDADataset(rootIdda,list_samples=clients[key],transform=test_transform,client_name=('test_diff_domain-'+key)),
                                    model=model, teacher_model=copy.deepcopy(model),test_client=True))
     f.close()
-    return Server(args=args,train_clients=train_clients,test_clients=test_clients, model=model,metrics=metrics)
+    clusters = createClusters(ks=args.num_clusters, params=args.cluster_param, FDAwindow=args.FDAwindow, root=rootIdda)
+    return Server(args=args,train_clients=train_clients,test_clients=test_clients, model=model,metrics=metrics, clusters=clusters)
