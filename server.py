@@ -4,11 +4,12 @@ from datetime import datetime
 import numpy as np
 import torch
 import os
+from cluster import createClusters
 
 
 class Server:
 
-    def __init__(self, args, train_clients, test_clients, model, metrics):
+    def __init__(self, args, train_clients, test_clients, model, metrics, clusters):
         self.args=args
         self.train_clients = train_clients
         self.test_clients = test_clients
@@ -36,6 +37,19 @@ class Server:
             self.clientsDistribution=np.random.uniform(1,self.args.distributionParam,len(self.train_clients))
         if self.args.distribution=='binomial':
             self.clientsDistribution=np.random.binomial(1,0.25,len(self.train_clients))+0.001
+        self.clusters = clusters if self.args.clustering else None #dict={client1_name: cluster, client2_name: cluster, ...}
+        self.submodels = self.submodels_init() 
+        self.sub_teachers = self.submodels_init()
+
+    def submodels_init(self):
+        submodels = {}
+        classifier_keys =list([k for k in self.model.state_dict().keys() if "classifier" in k])
+        clusters = list(set(self.clusters.values()))
+        for cluster in clusters:
+            submodels[cluster] = OrderedDict()
+            for key in classifier_keys:
+                submodels[cluster][key] = self.model_params_dict[key]
+        return submodels
 
     def updateClientProb(self):
         if self.args.distribution=='binomial':
@@ -58,6 +72,18 @@ class Server:
             self.teacher_model.load_state_dict(torch.load(path,map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
             self.teacher_model_params_dict = copy.deepcopy(self.model.state_dict())
 
+    '''Merge of global state_dict and cluster-specific state_dict
+       :param: state_dict of the global model and client name
+       :return: client state_dict'''
+    def client_state_dict(self, shared_state_dict, client_name):
+        if not self.args.clustering:
+            return shared_state_dict
+        state_dict = copy.deepcopy(shared_state_dict)
+        cluster = self.clusters.get(client_name)
+        for key in state_dict:
+            if key in self.submodels[cluster]:
+                state_dict[key] = self.submodels[cluster][key]
+        return state_dict
 
     def train_round(self, clients):
         """
@@ -69,14 +95,46 @@ class Server:
         for i, c in enumerate(clients):
             # TODO: missing code here!
             print(f"\tCLIENT {i + 1}/{len(clients)}: {c}")
-            c.model.load_state_dict(self.model_params_dict)
+            client_model = self.client_state_dict(self.model_params_dict, c.name)
+            c.model.load_state_dict(client_model)
             if self.unsupervised:
-                c.teacher_model.load_state_dict(self.teacher_model_params_dict)
+                client_teacher = self.client_state_dict(self.teacher_model_params_dict, c.name)
+                c.teacher_model.load_state_dict(client_teacher)
             num_samples, update = c.train()
-            updates.append((num_samples, update))
+            updates.append((c.name, num_samples, update))
         return updates
+    
+    def aggregate_cluster_models(self, updates):
+        
+        classifier_keys =list([k for k in self.model_params_dict.keys() if "classifier" in k])
+        bases={}
+        total_weight={}
+        for (client_name, client_samples, client_model) in updates:
 
-    def aggregate(self, updates):
+            cluster = self.clusters.get(client_name)
+
+            if bases.get(cluster) is None:
+                bases[cluster] = OrderedDict()
+            if total_weight.get(cluster) is None:
+                total_weight[cluster] = 0
+
+            total_weight[cluster] += client_samples
+            for key, value in client_model.items():
+                if key not in classifier_keys:
+                    continue
+                if key in bases[cluster]:
+                    bases[cluster][key] += client_samples * value.type(torch.FloatTensor)
+                else:
+                    bases[cluster][key] = client_samples * value.type(torch.FloatTensor)
+
+        for cluster, state_dict in bases.items():
+            for key, value in state_dict.items():
+                if total_weight[cluster] != 0:
+                    self.submodels[cluster][key] = value.type(torch.FloatTensor) / total_weight[cluster]
+        
+         
+
+    def aggregate(self, updates, teacher=False):
         """
         This method handles the FedAvg aggregation
         :param updates: updates received from the clients
@@ -89,7 +147,7 @@ class Server:
         total_weight = 0
         base = OrderedDict()
 
-        for (client_samples, client_model) in updates:
+        for (_, client_samples, client_model) in updates:
 
             total_weight += client_samples
             for key, value in client_model.items():
@@ -104,6 +162,9 @@ class Server:
             if total_weight != 0:
                 averaged_sol_n[key] = value / total_weight
 
+        if self.args.clustering:
+            self.aggregate_cluster_models(updates)
+
         return averaged_sol_n
     
     def update_models(self, updates, round):
@@ -116,6 +177,8 @@ class Server:
         if round % self.teacher_update == 0:
             self.teacher_model.load_state_dict(averaged_parameters, strict=False)
             self.techer_model_params_dict = copy.deepcopy(self.teacher_model.state_dict())
+            if self.args.clustering == True:
+                self.sub_teachers = copy.deepcopy(self.submodels)
         
 
     def train(self):
@@ -175,7 +238,8 @@ class Server:
         for client in self.test_clients:
             if client.name.find('eval_train')<0:
                 continue
-            client.model.load_state_dict(self.model_params_dict)
+            client_model = self.client_state_dict(self.model_params_dict, client.name.split("-")[1])
+            client.model.load_state_dict(client_model)
             loss,samples=client.test(self.metrics['eval_train'])
         
         self.metrics['eval_train'].get_results()
@@ -193,7 +257,8 @@ class Server:
         for client in self.test_clients:
             if client.name.find('eval_train')>=0:
                 continue
-            client.model.load_state_dict(self.model_params_dict)
+            client_model = self.client_state_dict(self.model_params_dict, client.name.split("-")[1])
+            client.model.load_state_dict(client_model)
             metr=client.name
             if client.name.find('-')>0:
                 metr=client.name[:client.name.find('-')]

@@ -1,6 +1,8 @@
 import json
 import numpy as np
 from PIL import Image
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
 def extractMeansVarDictionary(root='data/idda/'):
     styles={}
@@ -73,7 +75,7 @@ def createClustersData(params='FDA',FDAwindow=1,root='data/idda/'):
     elif params=='FDA':
         z=int(FDAwindow/2)
         training_data=np.zeros((len(training_clients),FDAwindow*(z+1)*3))
-        test_data=np.zeros((len(test_clients),FDAwindow*FDAwindow*(z+1)*3))
+        test_data=np.zeros((len(test_clients),FDAwindow*(z+1)*3))
         for i in range(len(training_clients)):
             training_data[i,:(z+1)*(z+1)*3]=np.array(clients[training_clients[i]]['FDA']['pos'])[:,:z+1,:z+1].reshape(1,-1)
             if z>0:
@@ -89,7 +91,7 @@ def createClustersData(params='FDA',FDAwindow=1,root='data/idda/'):
     return training_clients, training_data,test_clients,test_data
 
 
-def createClusters(k,params='FDA',FDAwindow=1,root='data/idda/'):
+def createClusters(ks,params='FDA',FDAwindow=1,root='data/idda/'):
     training_clients,training_data,test_clients,test_data=createClustersData(params,FDAwindow,root)
     #training|test_clients: name of clients
     #training|test_data: matrix (n_clients,size(data_per_client)) on each row, data for the corresponding client
@@ -97,8 +99,21 @@ def createClusters(k,params='FDA',FDAwindow=1,root='data/idda/'):
     #same for test
 
     #MUST NORMALIZE!!!
+    training_data = training_data - np.mean(training_data, axis=0)
 
     #cluster (fit on train, assign both to test and train)
+    N = 5
+    max_silhouette = -1
+    for k in ks:
+        kmeans = KMeans(n_clusters=k, n_init=N, random_state=None).fit(training_data)
+        silhouette = silhouette_score(training_data, kmeans.labels_)
+        if silhouette > max_silhouette:
+            bestkmeans = kmeans
 
-
-    #return dictionary client_name, cluster number
+    clusters = {}
+    for i, client in enumerate(training_clients):
+        clusters[client] = bestkmeans.predict([training_data[i, :]])[0]
+    for i, client in enumerate(test_clients):
+        clusters[client] = bestkmeans.predict([test_data[i, :]])[0]
+    
+    return clusters
