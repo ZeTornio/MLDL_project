@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import MinMaxScaler
 
 def extractMeansVarDictionary(root='data/idda/'):
     styles={}
@@ -99,7 +100,11 @@ def createClusters(ks,params='FDA',FDAwindow=1,root='data/idda/'):
     #same for test
 
     #MUST NORMALIZE!!!
-    training_data = training_data - np.mean(training_data, axis=0)
+    scaler=MinMaxScaler()
+    scaler.fit(training_data)
+
+    training_data = scaler.transform(training_data)
+    test_data=scaler.transform(test_data)
 
     #cluster (fit on train, assign both to test and train)
     N = 5
