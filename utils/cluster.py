@@ -107,7 +107,7 @@ def createClusters(ks,params='FDA',FDAwindow=1,root='data/idda/'):
     test_data=scaler.transform(test_data)
 
     #cluster (fit on train, assign both to test and train)
-    N = 5
+    N = 10
     max_silhouette = -1
     for k in ks:
         kmeans = KMeans(n_clusters=k, n_init=N, random_state=None).fit(training_data)
