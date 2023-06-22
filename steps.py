@@ -57,11 +57,11 @@ class Args:
         self.num_clusters=num_clusters 
         self.cluster_param=cluster_param
         self.FDAwindow=FDAwindow
-
-        if self.cluster_param not in ["FDA", "mean", "mean_variance", None]:
-            raise ValueError("Choose between: FDA, mean, mean_variance")
-        if self.cluster_param=="FDA" and self.FDAwindow == 0:
-            raise ValueError("You must specify window value")
+        if self.clustering:
+            if self.cluster_param not in ["FDA", "mean", "mean_variance"]:
+                raise ValueError("Choose between: FDA, mean, mean_variance")
+            if self.cluster_param=="FDA" and self.FDAwindow == 0:
+                raise ValueError("You must specify window value")
 
     def get_reduction(self):
         match self.reduction:
