@@ -4,7 +4,7 @@ from datetime import datetime
 import numpy as np
 import torch
 import os
-from cluster import createClusters
+from utils.cluster import createClusters
 
 
 class Server:
