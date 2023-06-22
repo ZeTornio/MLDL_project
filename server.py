@@ -37,9 +37,12 @@ class Server:
             self.clientsDistribution=np.random.uniform(1,self.args.distributionParam,len(self.train_clients))
         if self.args.distribution=='binomial':
             self.clientsDistribution=np.random.binomial(1,0.25,len(self.train_clients))+0.001
-        self.clusters = clusters if self.args.clustering else None #dict={client1_name: cluster, client2_name: cluster, ...}
-        self.submodels = self.submodels_init() 
-        self.sub_teachers = self.submodels_init()
+
+        self.clusters = clusters
+        if self.args.clustering:
+            self.submodels = self.submodels_init()
+            if self.unsupervised:
+                self.sub_teachers = self.submodels_init()
 
     def submodels_init(self):
         submodels = {}
@@ -48,7 +51,7 @@ class Server:
         for cluster in clusters:
             submodels[cluster] = OrderedDict()
             for key in classifier_keys:
-                submodels[cluster][key] = self.model_params_dict[key] #CHECK IF COPY>.DEEPCOPY
+                submodels[cluster][key] = copy.deepcopy(self.model_params_dict[key])
         return submodels
 
     def updateClientProb(self):
@@ -71,7 +74,11 @@ class Server:
         if self.unsupervised: 
             self.teacher_model.load_state_dict(torch.load(path,map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
             self.teacher_model_params_dict = copy.deepcopy(self.model.state_dict())
-        #UPDATE IT 
+        
+        if self.args.clustering:
+            self.submodels = self.submodels_init()
+            if self.unsupervised:
+                self.sub_teachers = self.submodels_init()
 
     '''Merge of global state_dict and cluster-specific state_dict
        :param: state_dict of the global model and client name
