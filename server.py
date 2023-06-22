@@ -246,7 +246,7 @@ class Server:
         for client in self.test_clients:
             if client.name.find('eval_train')<0:
                 continue
-            client_model = self.client_state_dict(self.model_params_dict, client.name.split("-")[1])
+            client_model = self.client_state_dict(self.model_params_dict, client.name.split("-")[1] if client.name.find("-")>=0 else client.name)
             client.model.load_state_dict(client_model)
             loss,samples=client.test(self.metrics['eval_train'])
         
@@ -265,7 +265,7 @@ class Server:
         for client in self.test_clients:
             if client.name.find('eval_train')>=0:
                 continue
-            client_model = self.client_state_dict(self.model_params_dict, client.name.split("-")[1])
+            client_model = self.client_state_dict(self.model_params_dict, client.name.split("-")[1] if client.name.find("-")>=0 else client.name)
             client.model.load_state_dict(client_model)
             metr=client.name
             if client.name.find('-')>0:
