@@ -226,6 +226,7 @@ class Server:
         torch.save(self.model.state_dict(),self.saveName+"/round_"+str(r+1)+".pt")
             
     def showClientSample(self,name=None,index=0):
+        #currently does not support sub models
         if name==None:
             self.test_clients[0].model.load_state_dict(self.model_params_dict)
             return self.test_clients[0].showSample(index)
