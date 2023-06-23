@@ -138,7 +138,7 @@ class Server:
         for cluster, state_dict in bases.items():
             for key, value in state_dict.items():
                 if total_weight[cluster] != 0:
-                    self.submodels[cluster][key] = value.type(torch.FloatTensor) / total_weight[cluster]
+                    self.submodels[cluster][key] = copy.deepcopy(value.type(torch.FloatTensor) / total_weight[cluster])
         
          
 
