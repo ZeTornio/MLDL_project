@@ -11,7 +11,7 @@ from utils.utils import HardNegativeMining, MeanReduction, MeanReductionPerClass
 from utils.cluster import createClusters
 
 class Args:
-    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None, reduction='mean',reductionParam=None, clustering=False, num_clusters=None, cluster_param=None, FDAwindow=0):
+    def __init__(self,num_rounds,num_epochs,clients_per_round=1,hnm=False,lr=0.05,bs=8,wd=0,m=0.9,saveEachRounds=None,saveFolder=None,testEachRounds=None, teacher_update=None, unsupervised=False, distribution='constant',distributionParam=None, reduction='mean',reductionParam=None, clustering=False, num_clusters=None, cluster_param=None, FDAwindow=1):
         #Rounds 
         self.num_rounds=num_rounds
         #Epochs per client for each round

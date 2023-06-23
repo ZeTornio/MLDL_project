@@ -44,7 +44,7 @@ def extractFDAstylesDict(n,root='data/idda/',size=(540,960)):
 
 
 def createClustersData(params='FDA',FDAwindow=1,root='data/idda/'):
-    if FDAwindow%2==0:
+    if FDAwindow%2==0 and params=='FDA':
         raise ValueError("You must use odd numbers as windows for FDA.")
     f=open(root+'clients_styles.json')
     clients=json.load(f)
