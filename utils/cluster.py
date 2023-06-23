@@ -114,7 +114,7 @@ def createClusters(ks,params='FDA',FDAwindow=1,root='data/idda/'):
         silhouette = silhouette_score(training_data, kmeans.labels_)
         if silhouette > max_silhouette:
             bestkmeans = kmeans
-
+            max_silhouette=silhouette
     clusters = {}
     for i, client in enumerate(training_clients):
         clusters[client] = bestkmeans.predict([training_data[i, :]])[0]
